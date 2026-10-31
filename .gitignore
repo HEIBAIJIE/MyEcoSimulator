@@ -3,3 +3,8 @@
 .vs/
 TestResults/
 .local/
+node_modules/
+wwwroot/
+web/test-results/
+web/playwright-report/
+web/*.tsbuildinfo

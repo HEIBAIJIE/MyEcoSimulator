@@ -5,6 +5,7 @@ public sealed class PersistentClock(MongoRunStore store):BackgroundService
 {
     private readonly System.Collections.Concurrent.ConcurrentDictionary<string,(double Speed,DateTime Next)> active=new();
     public void Pause(string id)=>active.TryRemove(id,out _);
+    public bool IsRunning(string id)=>active.ContainsKey(id);
     public void Resume(string id,double speed)
     {
         if(active.Count>=32 && !active.ContainsKey(id)) throw new RuleException("调度运行上限32");

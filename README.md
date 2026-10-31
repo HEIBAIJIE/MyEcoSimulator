@@ -34,7 +34,7 @@ for (int t = 0; t < 720; t++) world.AdvanceAutonomously();
 var history = world.AutonomousHistory; // 完整快照、决策输入/版本、公开任务和实际反馈
 ```
 
-策略接口为 `IPersonStrategy` / `ICompanyStrategy`，仅接收各自可见信息；观察者快照不传给策略。基准固定工资、单企业、无融资分红、禁止个人食品生产；库存压力降价等为策略假设。验证关注合法性与可解释性，不要求价格稳定或人口长期存活。运行服务由F04提供，观察界面留F05。
+策略接口为 `IPersonStrategy` / `ICompanyStrategy`，仅接收各自可见信息；观察者快照不传给策略。基准固定工资、单企业、无融资分红、禁止个人食品生产；库存压力降价等为策略假设。验证关注合法性与可解释性，不要求价格稳定或人口长期存活。运行服务由F04提供，F05观察界面已完成。
 
 
 ## F04 历史内存服务接口（由下方F04A入口替代）
@@ -78,3 +78,20 @@ dotnet run --project src/EcoSimulator.Api --urls http://localhost:5184
 数据库连接不进入导出。初始化会检查副本集及实际事务能力；无数据库时启动失败。
 
 F04A完成范围以已验证用例为准，已知限制详见feature记录。
+
+## F05 观察界面
+
+前置：Node.js 22.12+，上述 MongoDB 副本集及环境配置。
+
+```powershell
+npm ci --prefix web
+npm run build --prefix web
+dotnet run --project src/EcoSimulator.Api --urls http://localhost:5184
+```
+
+打开 http://localhost:5184 。开发模式为 `npm run dev --prefix web`，Vite 将 `/runs` 转发至5184。
+浏览器保存运行标识，刷新只读取持久化事实；清除浏览器存储后可输入原标识。
+历史筛选回合为结算回合t，快照边界t+1为该回合提交结果。导出通过浏览器下载NDJSON流。
+
+真实浏览器验收：API运行后执行 `npx --prefix web playwright install chromium`、`npm run test:e2e --prefix web`。
+测试使用真实MongoDB和Chromium，创建六个新运行，各推进720回合，并保存截图至 `web/test-results/`。

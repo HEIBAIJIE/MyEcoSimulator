@@ -8,17 +8,20 @@ builder.Services.AddSingleton(store);
 builder.Services.AddSingleton<EcoSimulator.Api.PersistentClock>();
 builder.Services.AddHostedService(sp=>sp.GetRequiredService<EcoSimulator.Api.PersistentClock>());
 var app=builder.Build();
+app.UseDefaultFiles();
+app.UseStaticFiles();
 app.Use(async (context,next)=> { try { await next(context); } catch(Exception e) when(e is RuleException or System.Text.Json.JsonException) { context.Response.StatusCode=400; await context.Response.WriteAsJsonAsync(new {error=e.Message}); } });
 IResult Json(string value)=>Results.Text(value,"application/json");
 app.MapPost("/runs",async (CreateRun request,CancellationToken ct)=> {
     if((request.Configuration is null)==(request.Variant is null)) throw new RuleException("明确提供variant或configuration之一");
     return Json(Wire.Write(new {Id=await store.Create(request.RequestId,request.Configuration is null?Variants.Create(request.Variant!):ScenarioLoader.Read(request.Configuration),request.Policy,ct)}));
 });
-app.MapGet("/runs/{id}",async (string id,CancellationToken ct)=>Json(Wire.Write(await store.Status(id,ct))));
+app.MapGet("/runs/{id}",async (string id,EcoSimulator.Api.PersistentClock clock,CancellationToken ct)=>Json(Wire.Write((await store.Status(id,ct)) with { Running=clock.IsRunning(id) })));
 app.MapPost("/runs/{id}/commands",async (string id,RunCommand request,EcoSimulator.Api.PersistentClock clock,CancellationToken ct)=> {
+    bool wasRunning=clock.IsRunning(id);
     clock.Pause(id);
     var result=await store.Command(id,request.RequestId,request.Operation,request.Speed,ct);
-    if(request.Operation=="resume" && result.PauseReason is null) clock.Resume(id,result.Speed);
+    if((request.Operation=="resume" || request.Operation=="speed" && wasRunning) && result.PauseReason is null) clock.Resume(id,result.Speed);
     return Json(Wire.Write(result));
 });
 app.MapGet("/runs/{id}/snapshot",async (string id,long? turn,CancellationToken ct)=>Json(await store.Snapshot(id,turn,ct)));
