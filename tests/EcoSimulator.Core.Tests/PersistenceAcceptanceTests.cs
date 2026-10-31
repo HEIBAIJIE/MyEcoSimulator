@@ -7,7 +7,7 @@ namespace EcoSimulator.Core.Tests;
 public sealed class PersistenceAcceptanceTests
 {
     [Theory]
-    [InlineData("baseline")][InlineData("no-resident-cash")][InlineData("low-capital")][InlineData("productivity")][InlineData("demand")][InlineData("pause")]
+    [InlineData("baseline")][InlineData("no-resident-cash")][InlineData("low-capital")][InlineData("productivity")][InlineData("demand")][InlineData("pause")][InlineData("production")]
     public async Task FullRun(string variant)
     {
         const string connection="mongodb://localhost:27018/?directConnection=true";

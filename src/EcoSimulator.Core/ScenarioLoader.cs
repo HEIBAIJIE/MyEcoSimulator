@@ -31,9 +31,17 @@ public static class ScenarioLoader
     {
         void R(bool b, string message) => Require(b, message);
         R(!string.IsNullOrWhiteSpace(s.Name) && s.RuleVersion == "0.3" && !string.IsNullOrWhiteSpace(s.ConfigurationVersion), "不支持的版本或空名称");
-        R(s.EnabledMechanisms.Length == 0, "当前阶段不支持启用扩展机制");
+        R(s.EnabledMechanisms.Distinct().Count() == s.EnabledMechanisms.Length && s.EnabledMechanisms.All(x => x == "production-1"), "当前阶段不支持启用扩展机制");
+        if(s.EnabledMechanisms.Contains("production-1"))
+        {
+            var p=s.Procurement;
+            R(s.Strategy.Version=="procurement-1" && p is not null && p.Version=="procurement-1" && p.Window>0 && p.Safety>=0 && p.Trial>0 && p.Observation>0 && p.MinimumCash>=0 && p.StopTurns>0 && p.ResumeTurns>0 && p.BuyPercent>=100 && p.BuyPercent<=170 && p.SellPercent>=80 && p.SellPercent<=110, "Invalid or disabled procurement parameters");
+            R(s.Entities.Count(e => e.Kind==EntityKind.Company)==1 && s.Recipes.Length==1 && s.Recipes[0].Steps.Length>0 && s.Schedule.All(c => c.Output is null), "F06 requires one company, one stepped recipe, and no productivity schedule");
+            R(s.ItemTypes.Any(t=>t.Id=="food" && t.Tag=="food" && t.Satiety==20) && s.Recipes[0].OutputType=="food" && s.ItemTypes.Select(t=>t.Tag).Distinct().Count()==s.ItemTypes.Length, "procurement-1 requires food and unique homogeneous material tags");
+        }
+        else R(s.Procurement is null && s.Strategy.Version=="baseline-1", "Invalid or disabled procurement parameters");
         R(s.Terrain == "flat" && s.DeathInvestmentPolicy == "confiscate", "不支持的地形或股权死亡机制");
-        R(s.World.Version == "0.3" && s.Strategy.Version == "baseline-1", "不支持的参数版本");
+        R(s.World.Version == "0.3" && (s.Strategy.Version == "baseline-1" || s.Strategy.Version == "procurement-1"), "不支持的参数版本");
         R(s.World.Maximum > 0 && new[] { s.World.SatietyDecay, s.World.EnergyDecay, s.World.RestRecovery, s.World.HungerDamage, s.World.FatigueDamage, s.World.HealthyThreshold, s.World.HealthRecovery }.All(x => x >= 0) && s.World.HealthyThreshold <= s.World.Maximum, "世界参数非法");
         R(s.Strategy.Window > 0 && s.Strategy.SafetyStock >= 0 && s.Strategy.TrialProduction >= 0 && s.Strategy.ObservationTurns > 0, "策略参数非法");
         R(s.Limits.Turns > 0 && s.Limits.HistoryTurns >= s.Limits.Turns && s.Limits.SnapshotInterval == 1 && s.Limits.MemoryBytes > 0, "运行边界非法");
@@ -61,20 +69,21 @@ public static class ScenarioLoader
         foreach (var p in s.Entities.Where(x => x.Kind == EntityKind.Person)) R(s.Memberships.Contains(new(p.Id, s.Issuer)), "个人必须属于国家");
         foreach (var e in s.Employees) R(Kind(e.Person, EntityKind.Person) && Kind(e.Company, EntityKind.Company) && !string.IsNullOrWhiteSpace(e.Job), "员工引用非法");
         R(s.Positions.Length == 0, "本阶段不支持额外职位");
-        foreach (var a in s.Authorizations) R(Kind(a.Person, EntityKind.Person) && Kind(a.Organization, EntityKind.Company) && new[] { "labor", "view", "custody", "pickup", "drop", "consume" }.Contains(a.Permission) && (a.Permission != "labor" || s.Employees.Any(e => e.Person == a.Person && e.Company == a.Organization)), "不支持的授权");
+        foreach (var a in s.Authorizations) R(Kind(a.Person, EntityKind.Person) && (Kind(a.Organization, EntityKind.Company) || s.EnabledMechanisms.Contains("production-1") && entities.ContainsKey(a.Organization) && a.Permission is "material" or "tool") && new[] { "labor", "view", "custody", "pickup", "drop", "consume", "material", "tool" }.Contains(a.Permission) && (a.Permission != "labor" || s.Employees.Any(e => e.Person == a.Person && e.Company == a.Organization)), "不支持的授权");
         R(s.Warehouses.Select(x => x.Organization).Distinct().Count() == s.Warehouses.Length, "重复仓库");
         foreach (var w in s.Warehouses) { R(entities.ContainsKey(w.Organization) && !Kind(w.Organization, EntityKind.Person), "仓库引用非法"); TileCheck(w.Location); }
         foreach (var c in s.Entities.Where(e => e.Kind != EntityKind.Person)) R(s.Warehouses.Any(w => w.Organization == c.Id), "组织缺少固定仓库");
         var types = s.ItemTypes.ToDictionary(x => x.Id);
         R(types.Count > 0, "缺物品定义");
-        foreach (var t in s.ItemTypes) R(!string.IsNullOrWhiteSpace(t.Id) && !string.IsNullOrWhiteSpace(t.Tag) && t.Unit == "piece" && t.Quality == 1 && t.Satiety > 0 && t.Portable && t.Durability is null, "不支持的物品属性");
+        foreach (var t in s.ItemTypes) R(!string.IsNullOrWhiteSpace(t.Id) && !string.IsNullOrWhiteSpace(t.Tag) && t.Unit == "piece" && t.Quality == 1 && t.Satiety >= 0 && t.Portable && (t.Durability is null || s.EnabledMechanisms.Contains("production-1") && t.Durability > 0), "不支持的物品属性");
         var recipes = s.Recipes.ToDictionary(x => x.Id);
-        foreach (var r in s.Recipes) R(Kind(r.Company, EntityKind.Company) && types.ContainsKey(r.OutputType) && r.Output > 0 && r.Wage >= 0 && r.Hours == 1 && !string.IsNullOrWhiteSpace(r.Version), "配方非法");
+        foreach (var r in s.Recipes) R(Kind(r.Company, EntityKind.Company) && types.ContainsKey(r.OutputType) && r.Output > 0 && r.Wage >= 0 && (r.Hours == 1 || s.EnabledMechanisms.Contains("production-1")) && !string.IsNullOrWhiteSpace(r.Version), "配方非法");
+        foreach (var r in s.Recipes) ProductionRules.Validate(s, r);
         R(s.Tasks.Select(x => x.Id).Distinct().Count() == s.Tasks.Length, "重复任务");
         foreach (var t in s.Tasks)
         {
             R(recipes.ContainsKey(t.Recipe), "任务配方悬空"); var r = recipes[t.Recipe]; TileCheck(t.Location);
-            R(t.EffectiveTurn == 0 && t.Company == r.Company && t.RecipeVersion == r.Version && t.Wage == r.Wage && t.Output == r.Output && s.Employees.Any(e => e.Person == t.Employee && e.Company == t.Company && e.Job == r.Job) && s.Authorizations.Contains(new(t.Employee,t.Company,"labor")), "任务条件非法");
+            R(t.EffectiveTurn == 0 && t.Company == r.Company && t.RecipeVersion == r.Version && t.Wage == (r.Steps.Length == 0 ? r.Wage : r.Steps[0].Wage) && t.Output == (r.Steps.Length == 0 ? r.Output : r.Steps[0].Output) && s.Employees.Any(e => e.Person == t.Employee && e.Company == t.Company && e.Job == r.Job) && s.Authorizations.Contains(new(t.Employee,t.Company,"labor")), "任务条件非法");
         }
         R(s.Tasks.Select(t => t.Employee).Distinct().Count() == s.Tasks.Length, "员工重复任务");
         foreach (var h in s.Shares) R(Kind(h.Holder, EntityKind.Person) && Kind(h.Company, EntityKind.Company) && h.Investment >= 0, "股东非法");

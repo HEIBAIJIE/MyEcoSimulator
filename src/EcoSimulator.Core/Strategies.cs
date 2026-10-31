@@ -91,6 +91,7 @@ public sealed partial class World
     {
         lock(gate)
         {
+            if(scenario.EnabledMechanisms.Contains("production-1")) return AdvanceProductionAutonomously();
             personStrategy ??= new BaselinePersonStrategy(); companyStrategy ??= new BaselineCompanyStrategy();
             var before=Snapshot();
             var people=before.Entities.Where(e => e.Kind==EntityKind.Person && e.Health>0).Select(e => personStrategy.Decide(View(e.Id),personalMemories.GetValueOrDefault(e.Id,new()),EffectiveWorld,scenario.Strategy)).ToArray();

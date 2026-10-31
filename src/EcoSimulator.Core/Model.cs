@@ -1,4 +1,4 @@
-﻿namespace EcoSimulator.Core;
+namespace EcoSimulator.Core;
 
 public sealed class RuleException(string message) : Exception(message);
 public readonly record struct Tile(string Region, long X, long Y);
@@ -19,20 +19,25 @@ public sealed record Shareholding(string Holder, string Company, long Investment
 public sealed record Authorization(string Person, string Organization, string Permission);
 public sealed record Warehouse(string Organization, Tile Location);
 public sealed record ItemType(string Id, string Tag, string Unit, long Satiety, decimal Quality, bool Portable, long? Durability);
-public sealed record Recipe(string Id, string Version, string Company, string Job, string OutputType, long Output, long Wage, long Hours);
+public sealed record Recipe(string Id, string Version, string Company, string Job, string OutputType, long Output, long Wage, long Hours)
+{
+    public ProductionStep[] Steps { get; init; } = [];
+}
 public sealed record WorkTask(string Id, string Company, string Employee, string Recipe, string RecipeVersion, Tile Location, long EffectiveTurn, long Wage, long Output);
 public sealed record ItemLocation(Tile? Tile, string? Inventory);
 // A slice retains its original source interval, even after splitting or merging.
 public sealed record Lot(string Id, string Source, long Sequence, long OriginalQuantity, long OriginalCost,
     long Start, long Quantity, string Type, string? Owner, ItemLocation Location, string? Custodian)
 {
+    public long? RemainingDurability { get; init; }
+    public long WearCost { get; init; }
     [System.Text.Json.Serialization.JsonIgnore]
     public long Cost => checked((long)(((System.Numerics.BigInteger)OriginalCost * (Start + Quantity)) / OriginalQuantity
-        - ((System.Numerics.BigInteger)OriginalCost * Start) / OriginalQuantity));
+        - ((System.Numerics.BigInteger)OriginalCost * Start) / OriginalQuantity)) - WearCost;
     public Lot MergeAdjacent(Lot next)
     {
         if (Source != next.Source || Sequence != next.Sequence || OriginalQuantity != next.OriginalQuantity || OriginalCost != next.OriginalCost ||
-            checked(Start + Quantity) != next.Start || Type != next.Type || Owner != next.Owner || Location != next.Location || Custodian != next.Custodian)
+            checked(Start + Quantity) != next.Start || Type != next.Type || Owner != next.Owner || Location != next.Location || Custodian != next.Custodian || RemainingDurability != next.RemainingDurability || WearCost != 0 || next.WearCost != 0)
             throw new RuleException("仅允许相邻且全部属性一致的来源区间合并");
         return this with { Quantity = checked(Quantity + next.Quantity) };
     }
@@ -61,9 +66,17 @@ public sealed record Scenario(string Name, string RuleVersion, string Configurat
     Authorization[] Authorizations, Warehouse[] Warehouses, ItemType[] ItemTypes, Recipe[] Recipes, WorkTask[] Tasks,
     Lot[] Lots, Market[] Markets, string Issuer, long Issuance, CashAllocation[] Cash, string DeathInvestmentPolicy)
 {
+    public ProcurementParameters? Procurement { get; init; }
     public ScheduledChange[] Schedule { get; init; } = [];
 }
 public sealed record ScheduledChange(long Turn, string Version, long? Output, long? SatietyDecay, bool? BlockNewTasks);
 
 
 
+
+public sealed record MaterialInput(string Type, string Provider, long Quantity);
+public sealed record ToolInput(string Type, string Provider, long Wear, bool Shared = false);
+public sealed record ProductionStep(long Output, long Wage, long LaborHours, MaterialInput[] Materials, ToolInput[] Tools);
+public sealed record ActionProgress(string Person, string Task, string Recipe, string Version, long Started, int Completed, string State);
+
+public sealed record ProcurementParameters(string Version, long Window, long Safety, long Trial, long Observation, long MinimumCash, long StopTurns, long ResumeTurns, long BuyPercent, long SellPercent);

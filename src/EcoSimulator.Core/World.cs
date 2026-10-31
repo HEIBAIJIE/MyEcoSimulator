@@ -1,4 +1,4 @@
-﻿namespace EcoSimulator.Core;
+namespace EcoSimulator.Core;
 public static class Inventory
 {
     internal static void Validate(IEnumerable<Lot> lots, IReadOnlyDictionary<string,Entity> entities, IReadOnlyDictionary<string,ItemType> types, Action<Tile> checkTile)
@@ -12,6 +12,10 @@ public static class Inventory
             if (l.Location.Tile is { } tile) checkTile(tile);
             if (l.Location.Inventory is { } person) ScenarioLoader.Require(entities.TryGetValue(person,out var p) && p.Kind == EntityKind.Person && l.Custodian == person, "物品栏或保管引用非法");
             if (l.Custodian is not null) ScenarioLoader.Require(entities.ContainsKey(l.Custodian), "保管引用非法");
+            var durability = types[l.Type].Durability;
+            ScenarioLoader.Require(l.WearCost >= 0 && l.Cost >= 0 && (durability is null
+                ? l.RemainingDurability is null && l.WearCost == 0
+                : l.Quantity == 1 && l.OriginalQuantity == 1 && l.Start == 0 && l.RemainingDurability >= 0 && l.RemainingDurability <= durability && l.WearCost == (long)((System.Numerics.BigInteger)l.OriginalCost * (durability.Value - l.RemainingDurability!.Value) / durability.Value)), "Invalid tool durability or accumulated wear cost");
             _ = l.Cost;
         }
         foreach (var group in all.GroupBy(l => l.Source))

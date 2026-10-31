@@ -6,6 +6,8 @@
 
 [F04A](feature/04a_persistence.md)已按已验证范围完成：API使用MongoDB持久化，支持状态恢复、分页历史与流式导出。已知限制见feature记录。
 
+[F06](feature/06_production.md)提供受约束生产场景：`ProductionScenario.Create()`，或创建运行时指定 `Variant: "production"`。使用独立 `production-1` / `procurement-1` 版本，原料、独占工具耐久、三回合完整步骤、工资优先采购与进度恢复；规则和明确拒绝的范围见feature记录。
+
 使用.NET SDK 9.0.300，目标.NET 8：
 
 ```powershell

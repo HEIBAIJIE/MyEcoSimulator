@@ -1,6 +1,6 @@
 # F06 受约束生产
 
-状态：待实施。依据：规则0.3，新增场景策略独立版本。依赖：F05。
+状态：已完成（下述明确范围）。依据：规则0.3，新增场景策略独立版本。依赖：F05（已完成）。
 
 ## 目标与来源
 
@@ -28,3 +28,15 @@
 不实现不可拆分在制品。新策略公式须版本化，不能冒称基准策略或改写合法性；必要成本规范未明确时保持能力关闭，不能标为完成。
 
 完成时填写：规范补充、实现入口、策略场景版本与验证。
+
+## 实现记录（2026-10-31）
+
+规则0.3 / production-1 / procurement-1。新增工具实际成本累计折耗和跨提供方投入权益规则，见市场会计；采购公式见 `spec/decision-rules/03_production_strategy.md`。基准 baseline-1 保持原策略及机制开关。本条对规划边界作明确收紧：只启用独立一小时步骤、独占工具、单企业单工种与同质原料市场；共享工具明确拒绝，待容量和耐久竞争规范完善后另立 feature。耐久工具市场因动态质量尚未实现而拒绝交易。不可拆分在制品继续拒绝。每一步含全部材料类型，不能把欠付投入延迟到后步。
+
+入口：`Production.cs`（校验、策略、场景工厂）、`Settlement.cs`（预留、整步原子结算、进度与清理）、`Recovery.cs`（world-production-1 独立恢复模式）、`ScenarioLoader.cs`（能力与配置拒绝）。API可通过现有创建接口 Variant=`production` 或完整场景配置启动。观察快照增加 Production 进度；事件保留原料来源、耐久、成本分录、动作进度与失败释放。历史不依靠重算生成。
+
+验证覆盖：原料/授权不足无工资产出、提供方不同的非现金成本转移、独占工具竞争、耐久耗尽、休息中断、跨恢复继续、部分采购保留交易但拒绝完整步骤、Q=5/H=3、延迟投入套利配方拒绝、D=120/I=100采购20、72回合自主断供场景。MongoDB完整验收沿用F04A边界及已知限制，新增production场景720回合。
+
+验证命令与结果：`dotnet build -c Release --nologo`，零警告零错误；`dotnet test -c Release --no-build --nologo --filter ProductionTests`，8/8通过；`dotnet test --no-build --nologo --filter 'FullyQualifiedName!~PersistenceAcceptanceTests'`，41/41通过（含基准720回合核心不变量与真实MongoDB事务测试）。全量Release一次47/48通过，唯一失败为原有RealReplicaSet并发去重用例2秒等待窗口超时“运行正由其他写入者持有”，单独复测1/1通过，不修改历史F04A或掩盖该波动。七场景完整720回合均完成，production初轮约23.1秒、恢复11ms、分页20ms；混合测试进程峰值包含其他长运行用例，不能作为单场景内存证明。最新改动另行重跑七场景完整验收，结果补记如下。`git diff --check`通过。未执行新的浏览器验收，不宣称F06新增专用前端生产界面已验收。
+
+最终代码复验：`dotnet test --nologo --filter 'FullyQualifiedName~ProductionTests|FullyQualifiedName~PersistenceAcceptanceTests.FullRun'`，15/15通过，约2分57秒，七场景均各720回合完成。production耗时17532ms、恢复9ms、分页8ms；回合240托管内存57379424字节、回合720为51740224字节，组合进程峰值342982656字节，数据库storageSize=2945024字节（该值受MongoDB检查点影响）。实测来自本机Windows、.NET8、MongoDB本地27018副本集，不作吞吐承诺。原有F04A限制继续有效。

@@ -19,6 +19,7 @@
 | 世界规则 | [回合结算与历史](world-rules/06_settlement_history.md) | 回合结算与历史 |
 | 世界规则 | [运行架构与观察](world-rules/07_runtime_observation.md) | 运行架构与观察 |
 | 决策规则 | [基准策略](decision-rules/02_baseline_strategy.md) | 基准个人与企业策略 |
+| 决策规则 | [受约束生产策略](decision-rules/03_production_strategy.md) | procurement-1 独立扩展策略 |
 | 内容配置 | [场景变体与指标](content-config/03_variants_metrics.md) | 场景变体与指标 |
 | 内容配置 | [配置规范](content-config/01_configuration.md) | 配置规范与最小场景 |
 | 内容配置 | [基准初始条件](content-config/02_baseline.md) | 基准初始条件 baseline-1 |
