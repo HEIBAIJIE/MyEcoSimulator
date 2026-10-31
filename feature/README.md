@@ -1,6 +1,6 @@
 ﻿# Feature 实施路线
 
-依据当前全部13份 spec，规则 `0.3`、配置 `baseline-1`。F01—F04已实现并验证；F05—F09待实施。核心支持固定意图结算及基准自主策略720回合运行。
+依据当前全部13份 spec，规则 `0.3`、配置 `baseline-1`，含MongoDB运行架构修订。F01—F04已实现并验证；F04A、F05—F09待实施。当前代码仍为F04内存服务，持久化目标由F04A追踪。
 
 feature以一个会话可完成实现、验证的交付能力为单位，内部模块合并实施，不机械拆成多个会话。实施前按当时仓库复核工作量；若确需拆分，保留独立验收并更新依赖，不能把未验证范围标为完成。
 
@@ -10,13 +10,14 @@ feature以一个会话可完成实现、验证的交付能力为单位，内部�
 | [F02 单回合经济结算](02_settlement.md) | **已完成**：固定意图驱动的完整经济回合 | F01 |
 | [F03 基准自主运行](03_baseline.md) | **已完成**：按精确策略自主运行720回合 | F02 |
 | [F04 运行服务与实验记录](04_runtime.md) | **已完成**：可控、可查、可导出的运行和五个变体 | F03 |
-| [F05 最小观察界面](05_observation.md) | 地图、曲线、详情与事件回溯 | F04 |
+| [F04A MongoDB持久化与有界内存](04a_persistence.md) | 原子持久化、重启恢复、分页历史和流式导出 | F04 |
+| [F05 最小观察界面](05_observation.md) | 地图、曲线、详情与事件回溯 | F04A |
 | [F06 受约束生产](06_production.md) | 原料、工具、多回合步骤与采购 | F05 |
 | [F07 多企业与多工种](07_organizations.md) | 明确授权下的组织与市场竞争 | F06 |
 | [F08 多区域与运输](08_space.md) | 区域市场、旅行与区域内大件搬运 | F07 |
 | [F09 地表与建筑](09_environment.md) | 地形实体建筑与地点动作条件 | F08 |
 
-F01—F03是内部核心里程碑；F05完成才满足首个可运行界面的全部观察要求。F06—F09按spec建议顺序扩展，不改变baseline-1的制度与开关。编号是规划边界，不要求每项消耗一次完整会话。
+F01—F03是内部核心里程碑；F05完成才满足首个可运行界面的全部观察要求。F04A安排在F04后、F05前，先确定持久化查询和分页边界，避免界面依赖全历史内存接口；保留原编号和历史记录。F06—F09按spec建议顺序扩展，不改变baseline-1的制度与开关。编号是规划边界，不要求每项消耗一次完整会话。
 
 ## Spec覆盖索引
 
@@ -28,8 +29,8 @@ F01—F03是内部核心里程碑；F05完成才满足首个可运行界面的�
 | [环境生理](../spec/world-rules/03_environment_needs.md) | F02、F09 |
 | [动作生产](../spec/world-rules/04_actions_production.md) | F02、F06、F08、F09 |
 | [市场会计](../spec/world-rules/05_markets_accounting.md) | F01、F02、F06、F07 |
-| [回合历史](../spec/world-rules/06_settlement_history.md) | F02、F03、F04 |
-| [运行观察](../spec/world-rules/07_runtime_observation.md) | F01、F04、F05及后续扩展顺序 |
+| [回合历史](../spec/world-rules/06_settlement_history.md) | F02、F03、F04、F04A |
+| [运行观察](../spec/world-rules/07_runtime_observation.md) | F01、F04、F04A、F05及后续扩展顺序 |
 | [主体决策](../spec/decision-rules/01_agent_decisions.md) | F02、F03、F06、F07 |
 | [基准策略](../spec/decision-rules/02_baseline_strategy.md) | F03、F04 |
 | [配置规范](../spec/content-config/01_configuration.md) | F01及各扩展能力校验 |
