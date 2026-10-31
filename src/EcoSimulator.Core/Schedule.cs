@@ -21,6 +21,7 @@ public static class Variants
         return name switch {
             "baseline" => s,
             "production" => ProductionScenario.Create(),
+            "organizations" => OrganizationScenario.Create(),
             "no-resident-cash" => s with { Name=name, ConfigurationVersion=name, Cash=s.Cash.Select(c => c.Entity.StartsWith("P") ? c with { Amount=0 } : c).ToArray(), Issuance=200000 },
             "low-capital" => s with { Name=name, ConfigurationVersion=name, Cash=s.Cash.Select(c => c.Entity=="F" ? c with { Amount=50 } : c).ToArray(), Shares=[new("P00","F",50)], Issuance=200050 },
             "productivity" => s with { Name=name, Schedule=[new(240,"productivity-1",1,null,null)] },

@@ -91,6 +91,7 @@ public sealed partial class World
     {
         lock(gate)
         {
+            if(scenario.EnabledMechanisms.Contains("organizations-1")) return AdvanceOrganizationsAutonomously();
             if(scenario.EnabledMechanisms.Contains("production-1")) return AdvanceProductionAutonomously();
             personStrategy ??= new BaselinePersonStrategy(); companyStrategy ??= new BaselineCompanyStrategy();
             var before=Snapshot();

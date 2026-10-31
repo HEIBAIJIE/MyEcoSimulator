@@ -16,7 +16,7 @@ public sealed partial class World
     // The persistent runtime calls this only at a committed boundary. Full facts live in storage.
     public RecoveryState Capture()
     {
-        lock(gate) return new(scenario.EnabledMechanisms.Contains("production-1") ? "world-production-1" : "world-1",Turn,People.Values.ToArray(),lots.ToArray(),
+        lock(gate) return new(scenario.EnabledMechanisms.Contains("organizations-1") ? "world-organizations-1" : scenario.EnabledMechanisms.Contains("production-1") ? "world-production-1" : "world-1",Turn,People.Values.ToArray(),lots.ToArray(),
             balances.Select(b=>new BalanceValue(b.Key.Item1,b.Key.Item2,b.Value)).ToArray(),
             (currentMarkets??scenario.Markets).ToArray(),
             publishedTasks.Where(t=>t.EffectiveTurn>=Turn || productionProgress.Values.Any(p => p.Task==t.Id && p.State=="running")).ToArray(),Shares.ToArray(),statuses.ToArray(),
@@ -27,7 +27,7 @@ public sealed partial class World
     public static World Restore(Scenario scenario, RecoveryState state)
     {
         ScenarioLoader.Validate(scenario);
-        ScenarioLoader.Require(state.Schema==(scenario.EnabledMechanisms.Contains("production-1") ? "world-production-1" : "world-1") && state.Turn>=0,"不兼容恢复模式");
+        ScenarioLoader.Require(state.Schema==(scenario.EnabledMechanisms.Contains("organizations-1") ? "world-organizations-1" : scenario.EnabledMechanisms.Contains("production-1") ? "world-production-1" : "world-1") && state.Turn>=0,"不兼容恢复模式");
         var w=new World(scenario) { Turn=state.Turn, currentEntities=state.Entities.ToDictionary(e=>e.Id),
             lots=state.Lots.ToArray(), balances=state.Balances.ToDictionary(b=>(b.Entity,b.Account),b=>b.Value),
             currentMarkets=state.Markets.ToArray(),currentShares=state.Shares.ToArray() };

@@ -74,7 +74,7 @@ public class SettlementTests
     [Fact] public void OrganizationPickupDoesNotGrantConsumptionAndExplicitConsumptionUsesOwnerBooks()
     {
         var s=Baseline.Create(); var stock=s.Lots.Single(l => l.Owner=="F");
-        s=s with { Authorizations=[..s.Authorizations,new("P01","F","pickup")] };
+        s=s with { Authorizations=[..s.Authorizations,new("P01","F","pickup"),new("P01","F","custody")] };
         var w=World.Load(s); var r=w.Advance(new([Intent("P01",new(ActionKind.Idle),null,new ItemInteraction(stock.Id,true))],[]));
         Assert.Equal("F",w.Lots.Single(l => l.Id==stock.Id).Owner); Assert.Equal("P01",w.Lots.Single(l => l.Id==stock.Id).Location.Inventory); Assert.Equal(10000,w.Report("F").Inventory);
         var permitted=s with { Authorizations=[..s.Authorizations,new("P01","F","consume")],Lots=s.Lots.Where(l => l.Owner!="P01").ToArray() };

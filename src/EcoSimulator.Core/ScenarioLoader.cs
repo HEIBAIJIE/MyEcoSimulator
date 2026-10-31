@@ -31,7 +31,9 @@ public static class ScenarioLoader
     {
         void R(bool b, string message) => Require(b, message);
         R(!string.IsNullOrWhiteSpace(s.Name) && s.RuleVersion == "0.3" && !string.IsNullOrWhiteSpace(s.ConfigurationVersion), "不支持的版本或空名称");
-        R(s.EnabledMechanisms.Distinct().Count() == s.EnabledMechanisms.Length && s.EnabledMechanisms.All(x => x == "production-1"), "当前阶段不支持启用扩展机制");
+        R(s.EnabledMechanisms.Distinct().Count() == s.EnabledMechanisms.Length && s.EnabledMechanisms.All(x => x is "production-1" or "organizations-1"), "当前阶段不支持启用扩展机制");
+        bool organizations=s.EnabledMechanisms.Contains("organizations-1");
+        OrganizationRules.Validate(s);
         if(s.EnabledMechanisms.Contains("production-1"))
         {
             var p=s.Procurement;
@@ -68,8 +70,10 @@ public static class ScenarioLoader
         foreach (var m in s.Memberships) R(Kind(m.Person, EntityKind.Person) && entities.ContainsKey(m.Organization) && !Kind(m.Organization, EntityKind.Person), "成员引用非法");
         foreach (var p in s.Entities.Where(x => x.Kind == EntityKind.Person)) R(s.Memberships.Contains(new(p.Id, s.Issuer)), "个人必须属于国家");
         foreach (var e in s.Employees) R(Kind(e.Person, EntityKind.Person) && Kind(e.Company, EntityKind.Company) && !string.IsNullOrWhiteSpace(e.Job), "员工引用非法");
-        R(s.Positions.Length == 0, "本阶段不支持额外职位");
-        foreach (var a in s.Authorizations) R(Kind(a.Person, EntityKind.Person) && (Kind(a.Organization, EntityKind.Company) || s.EnabledMechanisms.Contains("production-1") && entities.ContainsKey(a.Organization) && a.Permission is "material" or "tool") && new[] { "labor", "view", "custody", "pickup", "drop", "consume", "material", "tool" }.Contains(a.Permission) && (a.Permission != "labor" || s.Employees.Any(e => e.Person == a.Person && e.Company == a.Organization)), "不支持的授权");
+        R(organizations || s.Positions.Length == 0, "本阶段不支持额外职位");
+        foreach(var position in s.Positions) R(Kind(position.Organization,EntityKind.Company) && !string.IsNullOrWhiteSpace(position.Name) && position.Holders.Distinct().Count()==position.Holders.Length && position.Holders.All(h=>Kind(h,EntityKind.Person)),"职位引用非法");
+        R(s.Positions.Select(p=>(p.Organization,p.Name)).Distinct().Count()==s.Positions.Length && s.Authorizations.Distinct().Count()==s.Authorizations.Length,"Duplicate position or authorization");
+        foreach (var a in s.Authorizations) R(Kind(a.Person, EntityKind.Person) && (Kind(a.Organization, EntityKind.Company) || s.EnabledMechanisms.Contains("production-1") && entities.ContainsKey(a.Organization) && a.Permission is "material" or "tool") && new[] { "labor", "view", "custody", "pickup", "drop", "carry", "sell", "consume", "material", "tool" }.Contains(a.Permission) && (a.Permission != "labor" || s.Employees.Any(e => e.Person == a.Person && e.Company == a.Organization)), "不支持的授权");
         R(s.Warehouses.Select(x => x.Organization).Distinct().Count() == s.Warehouses.Length, "重复仓库");
         foreach (var w in s.Warehouses) { R(entities.ContainsKey(w.Organization) && !Kind(w.Organization, EntityKind.Person), "仓库引用非法"); TileCheck(w.Location); }
         foreach (var c in s.Entities.Where(e => e.Kind != EntityKind.Person)) R(s.Warehouses.Any(w => w.Organization == c.Id), "组织缺少固定仓库");
@@ -85,7 +89,7 @@ public static class ScenarioLoader
             R(recipes.ContainsKey(t.Recipe), "任务配方悬空"); var r = recipes[t.Recipe]; TileCheck(t.Location);
             R(t.EffectiveTurn == 0 && t.Company == r.Company && t.RecipeVersion == r.Version && t.Wage == (r.Steps.Length == 0 ? r.Wage : r.Steps[0].Wage) && t.Output == (r.Steps.Length == 0 ? r.Output : r.Steps[0].Output) && s.Employees.Any(e => e.Person == t.Employee && e.Company == t.Company && e.Job == r.Job) && s.Authorizations.Contains(new(t.Employee,t.Company,"labor")), "任务条件非法");
         }
-        R(s.Tasks.Select(t => t.Employee).Distinct().Count() == s.Tasks.Length, "员工重复任务");
+        R(organizations || s.Tasks.Select(t => t.Employee).Distinct().Count() == s.Tasks.Length, "员工重复任务");
         foreach (var h in s.Shares) R(Kind(h.Holder, EntityKind.Person) && Kind(h.Company, EntityKind.Company) && h.Investment >= 0, "股东非法");
         foreach (var c in s.Entities.Where(e => e.Kind == EntityKind.Company)) R(s.Shares.Any(h => h.Company == c.Id), "企业缺股东");
         R(s.Shares.Select(h => (h.Holder,h.Company)).Distinct().Count() == s.Shares.Length, "重复股权");

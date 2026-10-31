@@ -2,7 +2,10 @@ using System.Numerics;
 namespace EcoSimulator.Core;
 
 public enum OrderSide { Buy, Sell }
-public sealed record MarketOrder(string Id, string Entity, string Region, string Tag, OrderSide Side, long Limit, long Quantity);
+public sealed record MarketOrder(string Id, string Entity, string Region, string Tag, OrderSide Side, long Limit, long Quantity)
+{
+    public string? Actor { get; init; }
+}
 public sealed record ClearingResult(long Quantity, long? Lower, long? Upper, long? Price, IReadOnlyDictionary<string,long> Allocations);
 
 public static class Clearing

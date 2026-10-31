@@ -66,6 +66,9 @@ public sealed record Scenario(string Name, string RuleVersion, string Configurat
     Authorization[] Authorizations, Warehouse[] Warehouses, ItemType[] ItemTypes, Recipe[] Recipes, WorkTask[] Tasks,
     Lot[] Lots, Market[] Markets, string Issuer, long Issuance, CashAllocation[] Cash, string DeathInvestmentPolicy)
 {
+    public TaskPriority[] TaskPriorities { get; init; } = [];
+    public string? SharedResourceRule { get; init; }
+    public OrganizationPolicy[] Organizations { get; init; } = [];
     public ProcurementParameters? Procurement { get; init; }
     public ScheduledChange[] Schedule { get; init; } = [];
 }
@@ -80,3 +83,6 @@ public sealed record ProductionStep(long Output, long Wage, long LaborHours, Mat
 public sealed record ActionProgress(string Person, string Task, string Recipe, string Version, long Started, int Completed, string State);
 
 public sealed record ProcurementParameters(string Version, long Window, long Safety, long Trial, long Observation, long MinimumCash, long StopTurns, long ResumeTurns, long BuyPercent, long SellPercent);
+
+public sealed record OrganizationPolicy(string Company, string StrategyVersion, long SafetyStock, long SellPercent, bool Paused);
+public sealed record TaskPriority(string Company, string Job, long Priority);

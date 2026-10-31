@@ -11,6 +11,7 @@ public sealed record PersonStatus(string Person, string Kind, long FirstTurn, lo
 public sealed record StateFact(long Turn, int Stage, string Subject, string Kind, string Input, string Output);
 public sealed record ObserverSnapshot(long Turn, IReadOnlyList<Entity> Entities, IReadOnlyList<Lot> Lots, IReadOnlyDictionary<string,BalanceSheet> Accounts, IReadOnlyList<Market> Markets, IReadOnlyList<WorkTask> Tasks)
 {
+    public IReadOnlyList<Employee> Jobs { get; init; } = [];
     public IReadOnlyList<ActionProgress> Production { get; init; } = [];
 }
 public sealed record DecisionView(long Turn, Entity Self, BalanceSheet Account, IReadOnlyList<Lot> Inventory, IReadOnlyList<Authorization> Permissions, IReadOnlyList<WorkTask> Tasks, IReadOnlyList<Market> Markets);
@@ -38,12 +39,12 @@ public sealed partial class World
     {
         lock(gate) return new(Turn,Array.AsReadOnly(People.Values.ToArray()),Lots,
             scenario.Entities.ToDictionary(e => e.Id,e => Report(e.Id)).AsReadOnly(),Array.AsReadOnly((currentMarkets ?? scenario.Markets).ToArray()),
-            Array.AsReadOnly(scenario.Tasks.Concat(publishedTasks).Where(t => (t.EffectiveTurn==Turn || productionProgress.Values.Any(p => p.Task==t.Id && p.State=="running")) && People[t.Employee].Health>0).ToArray())) { Production=ProductionProgress };
+            Array.AsReadOnly(scenario.Tasks.Concat(publishedTasks).Where(t => (t.EffectiveTurn==Turn || productionProgress.Values.Any(p => p.Task==t.Id && p.State=="running")) && People[t.Employee].Health>0).ToArray())) { Production=ProductionProgress, Jobs=Employees };
     }
     public DecisionView View(string entity)
     {
         lock(gate) { var snap=Snapshot(); var self=People[entity];
-            return new(Turn,self,Report(entity),Array.AsReadOnly(lots.Where(l => l.Owner==entity).ToArray()),Array.AsReadOnly(scenario.Authorizations.Where(a => a.Person==entity).ToArray()),
+            return new(Turn,self,Report(entity),Array.AsReadOnly(lots.Where(l => l.Owner==entity || l.Owner is not null && scenario.Authorizations.Contains(new(entity,l.Owner,"view"))).ToArray()),Array.AsReadOnly(scenario.Authorizations.Where(a => a.Person==entity).ToArray()),
                 Array.AsReadOnly(snap.Tasks.Where(t => t.Employee==entity || t.Company==entity).ToArray()),snap.Markets); }
     }
     public TurnResult Advance(TurnInput supplied)
@@ -79,6 +80,7 @@ public sealed partial class World
         {
             if(!People.TryGetValue(p.Person,out var person) || person.Kind!=EntityKind.Person || person.Health==0) { Result(p.Person,"intent",false,"主体不存在或已死亡"); continue; }
             bool move=true; var destination=p.Destination ?? person.Location;
+            if(destination!=person.Location && lots.Any(l=>l.Location.Inventory==p.Person && l.Owner!=p.Person && l.Owner is not null && !scenario.Authorizations.Contains(new(p.Person,l.Owner,"carry")))) move=false;
             try { scenario.Regions.Single(r => r.Id==person.Location.Region).Validate(destination); } catch(RuleException) { move=false; }
             validMove[p.Person]=move; destinations[p.Person]=move?destination:person.Location;
             var a=p.Action; bool ok=Enum.IsDefined(a.Kind);
@@ -113,7 +115,7 @@ public sealed partial class World
         foreach(var group in actions.Where(x => x.Value.Kind==ActionKind.Labor).GroupBy(x => before.Tasks.Single(t => t.Id==x.Value.Task).Company))
         {
             var sequence=scenario.Employees.Where(e => e.Company==group.Key).Select(e => e.Person).Distinct().ToArray();
-            foreach(var x in group.OrderBy(x => (Array.IndexOf(sequence,x.Key)-(Turn%sequence.Length)+sequence.Length)%sequence.Length))
+            foreach(var x in group.OrderBy(x=>Priority(before.Tasks.Single(t=>t.Id==x.Value.Task))).ThenBy(x => (Array.IndexOf(sequence,x.Key)-(Turn%sequence.Length)+sequence.Length)%sequence.Length))
             { var task=before.Tasks.Single(t => t.Id==x.Value.Task); if(cash[group.Key]<(IsStepped(task)?Step(task).Wage:task.Wage)) { actions[x.Key]=new(ActionKind.Idle); Result(x.Key,"action",false,"工资预留不足"); } else { cash[group.Key]-=IsStepped(task)?Step(task).Wage:task.Wage; reservations.Add(new(x.Key,"wage",group.Key,IsStepped(task)?Step(task).Wage:task.Wage,Turn)); } }
         }
         var productionMaterials = new Dictionary<string,Lot[]>();
@@ -155,6 +157,7 @@ public sealed partial class World
                 ok &= location.Region==o.Region && (!actions.TryGetValue(o.Entity,out var a) || a.Kind!=ActionKind.Rest);
                 ok &= o.Side==OrderSide.Buy ? (entity.Kind==EntityKind.Person || scenario.EnabledMechanisms.Contains("production-1")) : (entity.Kind==EntityKind.Company || scenario.EnabledMechanisms.Contains("production-1"));
             }
+            if(o.Actor is not null) ok &= People.TryGetValue(o.Actor,out var actor) && actor.Kind==EntityKind.Person && actor.Health>0 && (o.Actor==o.Entity || o.Side==OrderSide.Sell && scenario.Authorizations.Contains(new(o.Actor,o.Entity,"sell")));
             if(ok && o.Side==OrderSide.Buy) { var budget=checked(o.Limit*o.Quantity); ok=cash[o.Entity]>=budget; if(ok) { cash[o.Entity]-=budget; reservations.Add(new(o.Id,"buy",o.Entity,budget,Turn)); } }
             if(ok && o.Side==OrderSide.Sell)
             {
@@ -176,13 +179,13 @@ public sealed partial class World
         foreach(var g in input.People.Where(p => actions.ContainsKey(p.Person) && validMove[p.Person]).SelectMany(p => p.Interactions.Where(i => i.PickUp).Select(i => (p.Person,i.Lot))).GroupBy(x => x.Lot))
         {
             var l=lots.SingleOrDefault(l => l.Id==g.Key); if(l==null) continue;
-            var candidates=g.Where(x => l.Location.Tile==People[x.Person].Location && (l.Owner==null || Allowed(l,x.Person,"pickup")) && (!claimed.TryGetValue(l.Id,out var owner) || owner==x.Person)).Select(x => x.Person).Distinct().ToArray();
+            var candidates=g.Where(x => l.Location.Tile==People[x.Person].Location && (l.Owner==null || Allowed(l,x.Person,"pickup") && Allowed(l,x.Person,"custody")) && (!claimed.TryGetValue(l.Id,out var owner) || owner==x.Person)).Select(x => x.Person).Distinct().ToArray();
             if(candidates.Length>0) pickupWinners[g.Key]=candidates[Random.Shared.Next(candidates.Length)];
         }
         foreach(var p in input.People.Where(p => actions.ContainsKey(p.Person))) foreach(var i in p.Interactions)
         {
             var l=lots.SingleOrDefault(l => l.Id==i.Lot); bool ok=validMove[p.Person] && l!=null && (!claimed.TryGetValue(i.Lot,out var owner) || owner==p.Person);
-            ok &= i.PickUp ? l!=null && pickupWinners.GetValueOrDefault(i.Lot)==p.Person && l.Location.Tile==People[p.Person].Location && (l.Owner==null || Allowed(l,p.Person,"pickup")) : l!=null && l.Location.Inventory==p.Person && Allowed(l,p.Person,"drop");
+            ok &= i.PickUp ? l!=null && pickupWinners.GetValueOrDefault(i.Lot)==p.Person && l.Location.Tile==People[p.Person].Location && (l.Owner==null || Allowed(l,p.Person,"pickup") && Allowed(l,p.Person,"custody")) : l!=null && l.Location.Inventory==p.Person && Allowed(l,p.Person,"drop");
             if(ok)
             {
                 var updated=l! with { Owner=l.Owner??p.Person,Location=i.PickUp?new(null,p.Person):new(People[p.Person].Location,null),Custodian=i.PickUp?p.Person:null };
@@ -317,6 +320,8 @@ public sealed partial class World
         foreach(var intent in input.People.Where(p=>p.Action.Kind==ActionKind.Labor && results.Any(r=>r.Subject==p.Person && r.Kind=="action" && !r.Success)))
             Fact(9,intent.Person,"production-precheck-failed",intent.Action,new { Progress=productionProgress.GetValueOrDefault(intent.Person),Released=reservations.Where(r=>r.Subject==intent.Person).ToArray() });
         foreach(var lot in lots.Where(l => l.RemainingDurability==0).ToArray()) Post(9,lot.Owner!,"exhausted-tool-cleanup",lots.Where(l => l.Id!=lot.Id));
+        foreach(var task in before.Tasks)
+            if(!input.People.Any(p=>p.Person==task.Employee && p.Action.Kind==ActionKind.Labor && p.Action.Task==task.Id)) Result(task.Id,"task",false,"Absent or selected another task; no wage");
         Fact(10,"world","反馈与预留释放",reservations,results); Turn++;
         return new(Turn-1,before,Snapshot(),Array.AsReadOnly(results.ToArray()),Array.AsReadOnly(reservations.ToArray()),Array.AsReadOnly(facts.ToArray()),Array.AsReadOnly(Enumerable.Range(1,10).ToArray()));
     }
