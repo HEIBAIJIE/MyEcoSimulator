@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EcoSimulator.Core", "src\Ec
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EcoSimulator.Core.Tests", "tests\EcoSimulator.Core.Tests\EcoSimulator.Core.Tests.csproj", "{77AD74FA-0408-4819-AB77-14C6982F67A8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EcoSimulator.Api", "src\EcoSimulator.Api\EcoSimulator.Api.csproj", "{D5010FDE-7A76-4AB1-98E7-85176BECAAA1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +45,18 @@ Global
 		{77AD74FA-0408-4819-AB77-14C6982F67A8}.Release|x64.Build.0 = Release|Any CPU
 		{77AD74FA-0408-4819-AB77-14C6982F67A8}.Release|x86.ActiveCfg = Release|Any CPU
 		{77AD74FA-0408-4819-AB77-14C6982F67A8}.Release|x86.Build.0 = Release|Any CPU
+		{D5010FDE-7A76-4AB1-98E7-85176BECAAA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5010FDE-7A76-4AB1-98E7-85176BECAAA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5010FDE-7A76-4AB1-98E7-85176BECAAA1}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D5010FDE-7A76-4AB1-98E7-85176BECAAA1}.Debug|x64.Build.0 = Debug|Any CPU
+		{D5010FDE-7A76-4AB1-98E7-85176BECAAA1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D5010FDE-7A76-4AB1-98E7-85176BECAAA1}.Debug|x86.Build.0 = Debug|Any CPU
+		{D5010FDE-7A76-4AB1-98E7-85176BECAAA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5010FDE-7A76-4AB1-98E7-85176BECAAA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5010FDE-7A76-4AB1-98E7-85176BECAAA1}.Release|x64.ActiveCfg = Release|Any CPU
+		{D5010FDE-7A76-4AB1-98E7-85176BECAAA1}.Release|x64.Build.0 = Release|Any CPU
+		{D5010FDE-7A76-4AB1-98E7-85176BECAAA1}.Release|x86.ActiveCfg = Release|Any CPU
+		{D5010FDE-7A76-4AB1-98E7-85176BECAAA1}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -50,5 +64,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{C7D6D9B2-003A-42D2-AFF9-951020E74C99} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{77AD74FA-0408-4819-AB77-14C6982F67A8} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{D5010FDE-7A76-4AB1-98E7-85176BECAAA1} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 EndGlobal

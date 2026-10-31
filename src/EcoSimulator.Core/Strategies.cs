@@ -93,19 +93,19 @@ public sealed partial class World
         {
             personStrategy ??= new BaselinePersonStrategy(); companyStrategy ??= new BaselineCompanyStrategy();
             var before=Snapshot();
-            var people=before.Entities.Where(e => e.Kind==EntityKind.Person && e.Health>0).Select(e => personStrategy.Decide(View(e.Id),personalMemories.GetValueOrDefault(e.Id,new()),scenario.World,scenario.Strategy)).ToArray();
+            var people=before.Entities.Where(e => e.Kind==EntityKind.Person && e.Health>0).Select(e => personStrategy.Decide(View(e.Id),personalMemories.GetValueOrDefault(e.Id,new()),EffectiveWorld,scenario.Strategy)).ToArray();
             var companies=before.Entities.Where(e => e.Kind==EntityKind.Company).Select(e => {
                 var stable=scenario.Employees.Where(x => x.Company==e.Id).Select(x => x.Person).Distinct().ToArray();
                 var living=Employees.Where(x => x.Company==e.Id).Select(x => x.Person).ToArray();
-                var view=new CompanyView(Turn,e.Id,Report(e.Id),lots.Where(l => l.Owner==e.Id).Sum(l => l.Quantity),before.Markets.Single(),Array.AsReadOnly(stable),Array.AsReadOnly(living),Array.AsReadOnly(scenario.Tasks.Concat(publishedTasks).Where(t => t.Company==e.Id && t.EffectiveTurn>=Turn).ToArray()),scenario.Recipes.Single(r => r.Company==e.Id),scenario.Warehouses.Single(w => w.Organization==e.Id).Location);
+                var view=new CompanyView(Turn,e.Id,Report(e.Id),lots.Where(l => l.Owner==e.Id).Sum(l => l.Quantity),before.Markets.Single(),Array.AsReadOnly(stable),Array.AsReadOnly(living),Array.AsReadOnly(scenario.Tasks.Concat(publishedTasks).Where(t => t.Company==e.Id && t.EffectiveTurn>=Turn).ToArray()),EffectiveRecipe(e.Id),scenario.Warehouses.Single(w => w.Organization==e.Id).Location);
                 return (Id:e.Id,Decision:companyStrategy.Decide(view,companyMemories.GetValueOrDefault(e.Id,new())));
             }).ToArray();
             var orders=people.Select(p => p.Order).Concat(companies.Select(c => c.Decision.Order)).OfType<MarketOrder>().ToArray();
             var input=new TurnInput(Array.AsReadOnly(people.Select(p => p.Intent).ToArray()),Array.AsReadOnly(orders));
-            var tasks=companies.SelectMany(c => c.Decision.Tasks).ToArray();
+            var tasks=BlockNewTasks ? [] : companies.SelectMany(c => c.Decision.Tasks).ToArray();
             foreach(var task in tasks)
             {
-                var recipe=scenario.Recipes.SingleOrDefault(r => r.Id==task.Recipe && r.Version==task.RecipeVersion);
+                var recipe=RecipeVersions.SingleOrDefault(r => r.Id==task.Recipe && r.Version==task.RecipeVersion);
                 ScenarioLoader.Require(task.EffectiveTurn==Turn+1 && recipe is not null && task.Company==recipe.Company && task.Output==recipe.Output && task.Wage==recipe.Wage && Employees.Any(e => e.Person==task.Employee && e.Company==task.Company && e.Job==recipe.Job) && task.Location==scenario.Warehouses.Single(w => w.Organization==task.Company).Location,"策略发布非法任务");
             }
             ScenarioLoader.Require(tasks.Select(t => t.Id).Distinct().Count()==tasks.Length && !tasks.Any(t => scenario.Tasks.Concat(publishedTasks).Any(old => old.Id==t.Id || old.EffectiveTurn==t.EffectiveTurn && old.Employee==t.Employee)),"重复公开任务");

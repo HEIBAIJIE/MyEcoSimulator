@@ -11,7 +11,7 @@ public static class ScenarioLoader
         {
             var resolver = new DefaultJsonTypeInfoResolver();
             resolver.Modifiers.Add(info => { if (info.Kind == JsonTypeInfoKind.Object) foreach (var p in info.Properties) if (p.Set is not null) p.IsRequired = true; });
-            var options = new JsonSerializerOptions { TypeInfoResolver = resolver, UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow };
+            var options = new JsonSerializerOptions { NumberHandling = JsonNumberHandling.AllowReadingFromString, TypeInfoResolver = resolver, UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow };
             options.Converters.Add(new JsonStringEnumConverter());
             var scenario = JsonSerializer.Deserialize<Scenario>(json, options) ?? throw new RuleException("场景为空");
             Validate(scenario);
@@ -37,6 +37,7 @@ public static class ScenarioLoader
         R(s.World.Maximum > 0 && new[] { s.World.SatietyDecay, s.World.EnergyDecay, s.World.RestRecovery, s.World.HungerDamage, s.World.FatigueDamage, s.World.HealthyThreshold, s.World.HealthRecovery }.All(x => x >= 0) && s.World.HealthyThreshold <= s.World.Maximum, "世界参数非法");
         R(s.Strategy.Window > 0 && s.Strategy.SafetyStock >= 0 && s.Strategy.TrialProduction >= 0 && s.Strategy.ObservationTurns > 0, "策略参数非法");
         R(s.Limits.Turns > 0 && s.Limits.HistoryTurns >= s.Limits.Turns && s.Limits.SnapshotInterval == 1 && s.Limits.MemoryBytes > 0, "运行边界非法");
+        R(s.Schedule.Select(c => c.Turn).Distinct().Count() == s.Schedule.Length && s.Schedule.All(c => c.Turn >= 0 && c.Turn < s.Limits.Turns && !string.IsNullOrWhiteSpace(c.Version) && (c.Output is null || c.Output > 0) && (c.SatietyDecay is null || c.SatietyDecay >= 0) && (c.Output is not null || c.SatietyDecay is not null || c.BlockNewTasks is not null)), "Schedule invalid");
         var regions = s.Regions.ToDictionary(x => x.Id);
         R(regions.Count > 0, "缺少区域");
         foreach (var a in s.Regions)

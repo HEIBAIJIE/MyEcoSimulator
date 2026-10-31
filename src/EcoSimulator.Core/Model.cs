@@ -59,7 +59,11 @@ public sealed record Scenario(string Name, string RuleVersion, string Configurat
     StrategyParameters Strategy, RunLimits Limits, string[] EnabledMechanisms, Region[] Regions, string Terrain,
     Entity[] Entities, Membership[] Memberships, Employee[] Employees, Position[] Positions, Shareholding[] Shares,
     Authorization[] Authorizations, Warehouse[] Warehouses, ItemType[] ItemTypes, Recipe[] Recipes, WorkTask[] Tasks,
-    Lot[] Lots, Market[] Markets, string Issuer, long Issuance, CashAllocation[] Cash, string DeathInvestmentPolicy);
+    Lot[] Lots, Market[] Markets, string Issuer, long Issuance, CashAllocation[] Cash, string DeathInvestmentPolicy)
+{
+    public ScheduledChange[] Schedule { get; init; } = [];
+}
+public sealed record ScheduledChange(long Turn, string Version, long? Output, long? SatietyDecay, bool? BlockNewTasks);
 
 
 

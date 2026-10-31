@@ -67,7 +67,7 @@ public sealed partial class World
         void Fact(int stage,string subject,string kind,object a,object b) => facts.Add(new(Turn,stage,subject,kind,System.Text.Json.JsonSerializer.Serialize(a),System.Text.Json.JsonSerializer.Serialize(b)));
         void Result(string subject,string kind,bool ok,string reason,long n=0) => results.Add(new(subject,kind,ok,reason,n));
         void Post(int stage,string subject,string reason,IEnumerable<Lot> inventory,params Entry[] entries)
-        { var prior=lots.ToArray(); Commit(new(Guid.NewGuid().ToString("N"),reason,Turn,stage.ToString(),entries),inventory); Fact(stage,subject,reason,prior,new { Lots=lots,Entries=entries }); }
+        { var prior=lots.ToArray(); Commit(new(Guid.NewGuid().ToString("N"),reason,Turn,stage.ToString(),entries),inventory); Fact(stage,subject,reason,prior.Where(l => !lots.Contains(l)).ToArray(),new { Lots=lots.Where(l => !prior.Contains(l)).ToArray(),Entries=entries }); }
         Entry D(string e,Account a,long n)=>new(e,a,n,0); Entry C(string e,Account a,long n)=>new(e,a,0,n);
         var actions=new Dictionary<string,MainAction>(); var destinations=new Dictionary<string,Tile>(); var validMove=new Dictionary<string,bool>();
         foreach(var p in input.People)
@@ -218,20 +218,20 @@ public sealed partial class World
                 }
                 long n=consumed.Sum(l => l.Quantity);
                 Post(7,x.Key,"进食",candidate,consumptionEntries.ToArray());
-                People[x.Key]=p with { Satiety=Math.Min(scenario.World.Maximum,checked(p.Satiety+checked(n*scenario.ItemTypes.Single(t => t.Id==a.Type).Satiety))) }; Fact(7,x.Key,"satiety",p,People[x.Key]); Result(x.Key,"action",true,"完成进食",n);
+                People[x.Key]=p with { Satiety=Math.Min(EffectiveWorld.Maximum,checked(p.Satiety+checked(n*scenario.ItemTypes.Single(t => t.Id==a.Type).Satiety))) }; Fact(7,x.Key,"satiety",p,People[x.Key]); Result(x.Key,"action",true,"完成进食",n);
             }
             else if(a.Kind==ActionKind.Labor)
             {
-                var t=before.Tasks.Single(t => t.Id==a.Task); var recipe=scenario.Recipes.Single(r => r.Id==t.Recipe && r.Version==t.RecipeVersion); var id=Guid.NewGuid().ToString("N"); var seq=NextSequence();
+                var t=before.Tasks.Single(t => t.Id==a.Task); var recipe=RecipeVersions.Single(r => r.Id==t.Recipe && r.Version==t.RecipeVersion); var id=Guid.NewGuid().ToString("N"); var seq=NextSequence();
                 var product=new Lot(id,id,seq,t.Output,t.Wage,0,t.Output,recipe.OutputType,t.Company,new(scenario.Warehouses.Single(w => w.Organization==t.Company).Location,null),t.Company);
                 Post(7,x.Key,"劳动工资与产品成本",[..lots,product],C(t.Company,Account.Cash,t.Wage),D(t.Company,Account.Inventory,t.Wage),D(x.Key,Account.Cash,t.Wage),C(x.Key,Account.RetainedEarnings,t.Wage)); Result(x.Key,"action",true,"完成劳动",t.Output);
             }
-            else if(a.Kind==ActionKind.Rest) { People[x.Key]=p with { Energy=Math.Min(scenario.World.Maximum,checked(p.Energy+scenario.World.RestRecovery)) }; Fact(7,x.Key,"rest",p,People[x.Key]); Result(x.Key,"action",true,"完成休息"); }
+            else if(a.Kind==ActionKind.Rest) { People[x.Key]=p with { Energy=Math.Min(EffectiveWorld.Maximum,checked(p.Energy+EffectiveWorld.RestRecovery)) }; Fact(7,x.Key,"rest",p,People[x.Key]); Result(x.Key,"action",true,"完成休息"); }
             else Result(x.Key,"action",true,"实际闲置");
         }
         foreach(var p in People.Values.Where(e => e.Kind==EntityKind.Person && e.Health>0).ToArray())
         {
-            var a=actions.GetValueOrDefault(p.Id,new(ActionKind.Idle)); var w=scenario.World;
+            var a=actions.GetValueOrDefault(p.Id,new(ActionKind.Idle)); var w=EffectiveWorld;
             long satiety=a.Kind==ActionKind.Eat?p.Satiety:Math.Max(0,p.Satiety-w.SatietyDecay), energy=a.Kind==ActionKind.Rest?p.Energy:Math.Max(0,p.Energy-w.EnergyDecay);
             void Status(string name,bool active) { var prior=statuses.SingleOrDefault(s => s.Person==p.Id && s.Kind==name); statuses.RemoveAll(s => s.Person==p.Id && s.Kind==name); if(active) statuses.Add(new(p.Id,name,prior?.FirstTurn??Turn,Turn)); }
             Status("hunger",satiety==0); Status("fatigue",energy==0);
