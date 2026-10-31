@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 namespace EcoSimulator.Core;
 
@@ -67,7 +67,7 @@ public sealed class SimulationRun
         }
         catch(Exception e) when(e is RuleException or OverflowException) { running=false; pauseReason=e.Message; }
     }
-    private static TurnMetrics Metrics(AutonomousTurn h,EconomicEvent[] events,string version)
+    public static TurnMetrics Metrics(AutonomousTurn h,EconomicEvent[] events,string version)
     {
         var r=h.Settlement; var before=r.Before; var after=r.After;
         var valid=h.Input.Orders.Where(o=>r.Results.Any(x=>x.Kind=="order" && x.Subject==o.Id && x.Success)).ToArray();

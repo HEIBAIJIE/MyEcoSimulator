@@ -1,10 +1,10 @@
-﻿# MyEcoSimulator
+# MyEcoSimulator
 
 规则来源见 [spec总览](spec/00_index.md)，实施状态见 [feature索引](feature/README.md)。
 
 当前已完成F01—F04：独立C#内存核心，支持严格场景加载、资产核对、固定意图结算及基准自主策略720回合运行。
 
-当前spec已改为MongoDB持久化目标，由待实施的[F04A](feature/04a_persistence.md)追踪，安排在F05界面之前；现有代码仍采用内存保存，不支持服务重启恢复。
+[F04A](feature/04a_persistence.md)已按已验证范围完成：API使用MongoDB持久化，支持状态恢复、分页历史与流式导出。已知限制见feature记录。
 
 使用.NET SDK 9.0.300，目标.NET 8：
 
@@ -37,7 +37,7 @@ var history = world.AutonomousHistory; // 完整快照、决策输入/版本、�
 策略接口为 `IPersonStrategy` / `ICompanyStrategy`，仅接收各自可见信息；观察者快照不传给策略。基准固定工资、单企业、无融资分红、禁止个人食品生产；库存压力降价等为策略假设。验证关注合法性与可解释性，不要求价格稳定或人口长期存活。运行服务由F04提供，观察界面留F05。
 
 
-## 内存运行服务
+## F04 历史内存服务接口（由下方F04A入口替代）
 
 启动：`dotnet run --project src/EcoSimulator.Api --urls http://localhost:5184`。
 
@@ -56,3 +56,25 @@ var history = world.AutonomousHistory; // 完整快照、决策输入/版本、�
 每回合保存快照、意图、理由、预留、执行反馈与批次变更事实；日汇总按日及参数版本分段。
 MemoryBudget按保留历史UTF-16序列化大小计费，提交前保守预留；不等于进程工作集上限。
 对象及导出临时缓冲另占内存，性能记录见F04。预算不足暂停且保留历史供导出。
+## F04A 持久化入口
+
+API 已切换为 MongoDB 必需配置，驱动 MongoDB.Driver 3.5.2，验证服务器 MongoDB 8.2。
+本地 Windows：`./scripts/start-mongo.ps1`；容器：`docker compose up -d`。
+使用 mongosh 初始化：
+`mongosh mongodb://localhost:27018 --eval 'rs.initiate({_id:"eco-rs",members:[{_id:0,host:"localhost:27018"}]})'`。
+
+```powershell
+$env:Mongo__Connection='mongodb://localhost:27018/?directConnection=true'
+$env:Mongo__Database='eco'
+dotnet run --project src/EcoSimulator.Api --urls http://localhost:5184
+```
+
+创建请求新增必填 Policy：
+`{"RequestId":"create-1","Variant":"baseline","Configuration":null,"Policy":{"Schema":"mongo-1","StorageBytes":4294967296,"InflightBytes":67108864,"ProcessBytes":2147483648,"PageSize":20}}`。
+旧F04场景可通过显式提供此部署边界创建持久化运行；旧runtime-1导出不是恢复输入。
+历史接口改为 `/history?after=-1&limit=20&subject=P00&item=food&market=R0:food`，返回Records及Next游标；完整回合保留关联。
+导出改为 runtime-2 NDJSON，首行配置与截止回合，次行初始化事件，其后每行一个完整回合；响应流逐回合读取并等待写出。
+重启默认停止调度，显式resume继续。恢复状态world-1保存余额、批次、任务、股份、生理状态、策略记忆与成交窗口。
+数据库连接不进入导出。初始化会检查副本集及实际事务能力；无数据库时启动失败。
+
+F04A完成范围以已验证用例为准，已知限制详见feature记录。

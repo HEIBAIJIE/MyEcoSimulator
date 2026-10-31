@@ -1,0 +1,8 @@
+﻿services:
+  mongo:
+    image: mongo:8.2.1
+    command: [mongod, --replSet, eco-rs, --bind_ip_all, --port, '27018']
+    ports: ['127.0.0.1:27018:27018']
+    volumes: [eco-mongo:/data/db]
+volumes:
+  eco-mongo:
