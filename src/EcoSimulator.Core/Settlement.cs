@@ -18,6 +18,7 @@ public sealed partial class World
 {
     private Dictionary<string,Entity>? currentEntities;
     private Market[]? currentMarkets;
+    private readonly List<WorkTask> publishedTasks = [];
     private Shareholding[]? currentShares;
     private readonly List<PersonStatus> statuses = [];
     private readonly List<(string Region,string Tag,long Price,long Quantity)> trades = [];
@@ -34,7 +35,7 @@ public sealed partial class World
     {
         lock(gate) return new(Turn,Array.AsReadOnly(People.Values.ToArray()),Lots,
             scenario.Entities.ToDictionary(e => e.Id,e => Report(e.Id)).AsReadOnly(),Array.AsReadOnly((currentMarkets ?? scenario.Markets).ToArray()),
-            Array.AsReadOnly(scenario.Tasks.Where(t => t.EffectiveTurn==Turn && People[t.Employee].Health>0).ToArray()));
+            Array.AsReadOnly(scenario.Tasks.Concat(publishedTasks).Where(t => t.EffectiveTurn==Turn && People[t.Employee].Health>0).ToArray()));
     }
     public DecisionView View(string entity)
     {
