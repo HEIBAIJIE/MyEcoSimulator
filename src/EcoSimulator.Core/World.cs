@@ -10,7 +10,7 @@ public static class Inventory
             ScenarioLoader.Require(!string.IsNullOrWhiteSpace(l.Id) && !string.IsNullOrWhiteSpace(l.Source) && l.Sequence >= 0 && l.OriginalQuantity > 0 && l.OriginalCost >= 0 && l.Start >= 0 && l.Quantity > 0 && checked(l.Start+l.Quantity) <= l.OriginalQuantity && types.ContainsKey(l.Type) && (l.Owner is null || entities.ContainsKey(l.Owner)), "批次数值或引用非法");
             ScenarioLoader.Require((l.Location.Tile is null) != (l.Location.Inventory is null), "物品必须有唯一位置");
             if (l.Location.Tile is { } tile) checkTile(tile);
-            if (l.Location.Inventory is { } person) ScenarioLoader.Require(entities.TryGetValue(person,out var p) && p.Kind == EntityKind.Person && l.Custodian == person, "物品栏或保管引用非法");
+            if (l.Location.Inventory is { } person) ScenarioLoader.Require(entities.TryGetValue(person,out var p) && p.Kind == EntityKind.Person && types[l.Type].Portable && l.Custodian == person, "物品栏或保管引用非法");
             if (l.Custodian is not null) ScenarioLoader.Require(entities.ContainsKey(l.Custodian), "保管引用非法");
             var durability = types[l.Type].Durability;
             ScenarioLoader.Require(l.WearCost >= 0 && l.Cost >= 0 && (durability is null

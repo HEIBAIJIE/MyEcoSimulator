@@ -48,11 +48,11 @@ public sealed partial class World
         var warehouse=scenario.Warehouses.Single(w => w.Organization==company).Location;
         var productType=scenario.ItemTypes.Single(t => t.Id==recipe.OutputType);
         long Stock(string type) => lots.Where(l => l.Owner==company && l.Type==type).Sum(l => l.Quantity);
-        var market=before.Markets.Single(m => m.Tag==productType.Tag);
+        var market=before.Markets.Single(m => m.Region==scenario.Warehouses.Single(w=>w.Organization==recipe.Company).Location.Region && m.Tag==productType.Tag);
         var memory=procurementMemory ?? new ProductionMemory(-1,0,0,0,0,0,null,[]);
         var average=memory.SalesWindow.Length==0 ? parameters.Trial : StrategyMath.Ceil(memory.SalesWindow.Sum()*24,memory.SalesWindow.Length);
         if(memory.Day!=Turn/24) memory=memory with { Day=Turn/24,Target=Math.Max(Turn==0?parameters.Trial:0,StrategyMath.Purchase(average,parameters.Safety,Stock(recipe.OutputType),0)),Produced=0 };
-        long estimatedCost=recipe.Steps.Sum(step => step.Wage+step.Materials.Sum(x => x.Quantity*before.Markets.Single(m => m.Tag==scenario.ItemTypes.Single(t => t.Id==x.Type).Tag).ReferencePrice)+step.Tools.Sum(x => { var type=scenario.ItemTypes.Single(t => t.Id==x.Type); return StrategyMath.Ceil(before.Markets.Single(m => m.Tag==type.Tag).ReferencePrice*x.Wear,type.Durability!.Value); }));
+        long estimatedCost=recipe.Steps.Sum(step => step.Wage+step.Materials.Sum(x => x.Quantity*before.Markets.Single(m => m.Region==scenario.Warehouses.Single(w=>w.Organization==recipe.Company).Location.Region && m.Tag==scenario.ItemTypes.Single(t => t.Id==x.Type).Tag).ReferencePrice)+step.Tools.Sum(x => { var type=scenario.ItemTypes.Single(t => t.Id==x.Type); return StrategyMath.Ceil(before.Markets.Single(m => m.Region==scenario.Warehouses.Single(w=>w.Organization==recipe.Company).Location.Region && m.Tag==type.Tag).ReferencePrice*x.Wear,type.Durability!.Value); }));
         bool bad=Turn>=parameters.Observation && (memory.SalesWindow.Sum()==0 || (System.Numerics.BigInteger)market.ReferencePrice*recipe.Output<estimatedCost);
         memory=memory with { BadTurns=bad?memory.BadTurns+1:0 };
         if(memory.BadTurns>=parameters.StopTurns && memory.PausedAt is null) memory=memory with { PausedAt=Turn };
@@ -62,7 +62,7 @@ public sealed partial class World
         foreach(var person in before.Entities.Where(e => e.Kind==EntityKind.Person && e.Health>0))
         {
             var view=View(person.Id); var pm=personalMemories.GetValueOrDefault(person.Id,new());
-            var decision=new BaselinePersonStrategy().Decide(view with { Markets=before.Markets.Where(m => m.Tag=="food").ToArray() },pm,EffectiveWorld,scenario.Strategy);
+            var decision=new BaselinePersonStrategy().Decide(view with { Markets=before.Markets.Where(m => m.Region==scenario.Warehouses.Single(w=>w.Organization==recipe.Company).Location.Region && m.Tag=="food").ToArray() },pm,EffectiveWorld,scenario.Strategy);
             personalDecisions.Add(decision);
             var task=before.Tasks.FirstOrDefault(t => t.Employee==person.Id);
             var intent=decision.Intent;
@@ -82,7 +82,7 @@ public sealed partial class World
         foreach(var material in recipe.Steps.SelectMany(s => s.Materials).Where(x => x.Provider==company).Select(x => x.Type).Distinct())
         {
             long demand=remainingTasks.Sum(t => { int completed=productionProgress.TryGetValue(t.Employee,out var p) && p.Task==t.Id && p.State=="running"?p.Completed:0; return recipe.Steps.Skip(completed).Sum(s => s.Materials.Where(m => m.Type==material).Sum(m => m.Quantity)); });
-            var tag=scenario.ItemTypes.Single(t => t.Id==material).Tag; var reference=before.Markets.Single(m => m.Tag==tag).ReferencePrice;
+            var tag=scenario.ItemTypes.Single(t => t.Id==material).Tag; var reference=before.Markets.Single(m => m.Region==scenario.Warehouses.Single(w=>w.Organization==recipe.Company).Location.Region && m.Tag==tag).ReferencePrice;
             long limit=Math.Max(1,checked(reference*parameters.BuyPercent)/100); long gap=StrategyMath.Purchase(demand,parameters.Safety,Stock(material),0); long quantity=Math.Min(gap,budget/limit); budget-=quantity*limit;
             if(quantity>0) orders.Add(new($"procure-{Turn}-{material}",company,warehouse.Region,tag,OrderSide.Buy,limit,quantity));
             purchases.Add(new { material,demand,Inventory=Stock(material),Arrivals=0,gap,quantity,limit });
@@ -111,12 +111,12 @@ public sealed partial class World
             personalMemories[person]=decision.Memory with {
                 IncompleteOrders=StrategyMath.Feedback(decision.Memory.IncompleteOrders,decision.Order,feedback),
                 LastIncome=result.Results.Any(r=>r.Subject==person && r.Success && r.Reason=="完成劳动") ? before.Tasks.Single(t=>t.Employee==person).Wage : 0,
-                LastSpending=(feedback?.Quantity??0)*(result.After.Markets.Single(m=>m.Tag=="food").LatestPrice??0),
+                LastSpending=(feedback?.Quantity??0)*(result.After.Markets.Single(m=>m.Tag=="food" && m.Region==before.Entities.Single(e=>e.Id==person).Location.Region).LatestPrice??0),
                 LastUnfilled=decision.Order is null?0:decision.Order.Quantity-(feedback?.Quantity??0),
                 LastOutcome=string.Join(";",result.Results.Where(r=>r.Subject==person && r.Kind=="action").Select(r=>r.Reason)) };
         }
         var sold=result.Results.SingleOrDefault(r => r.Kind=="order" && r.Subject==$"product-{result.Turn}"); long sales=sold?.Quantity??0;
-        procurementMemory=memory with { Produced=memory.Produced+production,Sales=sales,Revenue=sales*(result.After.Markets.Single(m => m.Tag==productType.Tag).LatestPrice??0),SalesWindow=memory.SalesWindow.Append(sales).TakeLast(checked((int)parameters.Window)).ToArray() };
+        procurementMemory=memory with { Produced=memory.Produced+production,Sales=sales,Revenue=sales*(result.After.Markets.Single(m => m.Region==scenario.Warehouses.Single(w=>w.Organization==recipe.Company).Location.Region && m.Tag==productType.Tag).LatestPrice??0),SalesWindow=memory.SalesWindow.Append(sales).TakeLast(checked((int)parameters.Window)).ToArray() };
         decisions.Add(new(result.Turn,company,scenario.RuleVersion,parameters.Version,"Wages reserved before procurement; independent steps; configured quote assumptions",Wire.Write(new { parameters,memory,purchases,wages,budget,estimatedCost,Planned=before.Tasks.Sum(t => recipe.Steps[before.Production.FirstOrDefault(p=>p.Person==t.Employee && p.Task==t.Id && p.State=="running")?.Completed??0].Output),Actual=production })));
         var history=new AutonomousTurn(result,input,tasks,decisions,memory.Target,production,Math.Max(0,memory.Produced+production-memory.Target)); autonomousHistory.Add(history); return history;
     }

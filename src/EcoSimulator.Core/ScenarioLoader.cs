@@ -31,9 +31,11 @@ public static class ScenarioLoader
     {
         void R(bool b, string message) => Require(b, message);
         R(!string.IsNullOrWhiteSpace(s.Name) && s.RuleVersion == "0.3" && !string.IsNullOrWhiteSpace(s.ConfigurationVersion), "不支持的版本或空名称");
-        R(s.EnabledMechanisms.Distinct().Count() == s.EnabledMechanisms.Length && s.EnabledMechanisms.All(x => x is "production-1" or "organizations-1"), "当前阶段不支持启用扩展机制");
+        R(s.EnabledMechanisms.Distinct().Count() == s.EnabledMechanisms.Length && s.EnabledMechanisms.All(x => x is "production-1" or "organizations-1" or "space-1" or "environment-1"), "当前阶段不支持启用扩展机制");
         bool organizations=s.EnabledMechanisms.Contains("organizations-1");
         OrganizationRules.Validate(s);
+        EnvironmentRules.Validate(s);
+        Require(s.EnabledMechanisms.Contains("space-1") ? s.Space is { Version: "space-1", HaulTurns: > 0 } : s.Space is null && s.Regions.Length==1,"Missing or disabled space configuration");
         if(s.EnabledMechanisms.Contains("production-1"))
         {
             var p=s.Procurement;
@@ -42,7 +44,7 @@ public static class ScenarioLoader
             R(s.ItemTypes.Any(t=>t.Id=="food" && t.Tag=="food" && t.Satiety==20) && s.Recipes[0].OutputType=="food" && s.ItemTypes.Select(t=>t.Tag).Distinct().Count()==s.ItemTypes.Length, "procurement-1 requires food and unique homogeneous material tags");
         }
         else R(s.Procurement is null && s.Strategy.Version=="baseline-1", "Invalid or disabled procurement parameters");
-        R(s.Terrain == "flat" && s.DeathInvestmentPolicy == "confiscate", "不支持的地形或股权死亡机制");
+        R((s.Terrain == "flat" || s.EnabledMechanisms.Contains("environment-1")) && s.DeathInvestmentPolicy == "confiscate", "不支持的地形或股权死亡机制");
         R(s.World.Version == "0.3" && (s.Strategy.Version == "baseline-1" || s.Strategy.Version == "procurement-1"), "不支持的参数版本");
         R(s.World.Maximum > 0 && new[] { s.World.SatietyDecay, s.World.EnergyDecay, s.World.RestRecovery, s.World.HungerDamage, s.World.FatigueDamage, s.World.HealthyThreshold, s.World.HealthRecovery }.All(x => x >= 0) && s.World.HealthyThreshold <= s.World.Maximum, "世界参数非法");
         R(s.Strategy.Window > 0 && s.Strategy.SafetyStock >= 0 && s.Strategy.TrialProduction >= 0 && s.Strategy.ObservationTurns > 0, "策略参数非法");
@@ -79,7 +81,7 @@ public static class ScenarioLoader
         foreach (var c in s.Entities.Where(e => e.Kind != EntityKind.Person)) R(s.Warehouses.Any(w => w.Organization == c.Id), "组织缺少固定仓库");
         var types = s.ItemTypes.ToDictionary(x => x.Id);
         R(types.Count > 0, "缺物品定义");
-        foreach (var t in s.ItemTypes) R(!string.IsNullOrWhiteSpace(t.Id) && !string.IsNullOrWhiteSpace(t.Tag) && t.Unit == "piece" && t.Quality == 1 && t.Satiety >= 0 && t.Portable && (t.Durability is null || s.EnabledMechanisms.Contains("production-1") && t.Durability > 0), "不支持的物品属性");
+        foreach (var t in s.ItemTypes) R(!string.IsNullOrWhiteSpace(t.Id) && !string.IsNullOrWhiteSpace(t.Tag) && t.Unit == "piece" && t.Quality == 1 && t.Satiety >= 0 && (t.Portable || s.EnabledMechanisms.Contains("space-1")) && (t.Durability is null || s.EnabledMechanisms.Contains("production-1") && t.Durability > 0), "不支持的物品属性");
         var recipes = s.Recipes.ToDictionary(x => x.Id);
         foreach (var r in s.Recipes) R(Kind(r.Company, EntityKind.Company) && types.ContainsKey(r.OutputType) && r.Output > 0 && r.Wage >= 0 && (r.Hours == 1 || s.EnabledMechanisms.Contains("production-1")) && !string.IsNullOrWhiteSpace(r.Version), "配方非法");
         foreach (var r in s.Recipes) ProductionRules.Validate(s, r);

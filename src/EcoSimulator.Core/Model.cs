@@ -22,6 +22,8 @@ public sealed record ItemType(string Id, string Tag, string Unit, long Satiety, 
 public sealed record Recipe(string Id, string Version, string Company, string Job, string OutputType, long Output, long Wage, long Hours)
 {
     public ProductionStep[] Steps { get; init; } = [];
+    public ConstructionOutput? Construction { get; init; }
+    public SiteCondition? Site { get; init; }
 }
 public sealed record WorkTask(string Id, string Company, string Employee, string Recipe, string RecipeVersion, Tile Location, long EffectiveTurn, long Wage, long Output);
 public sealed record ItemLocation(Tile? Tile, string? Inventory);
@@ -66,6 +68,8 @@ public sealed record Scenario(string Name, string RuleVersion, string Configurat
     Authorization[] Authorizations, Warehouse[] Warehouses, ItemType[] ItemTypes, Recipe[] Recipes, WorkTask[] Tasks,
     Lot[] Lots, Market[] Markets, string Issuer, long Issuance, CashAllocation[] Cash, string DeathInvestmentPolicy)
 {
+    public SpatialConfiguration? Space { get; init; }
+    public EnvironmentConfiguration? Environment { get; init; }
     public TaskPriority[] TaskPriorities { get; init; } = [];
     public string? SharedResourceRule { get; init; }
     public OrganizationPolicy[] Organizations { get; init; } = [];

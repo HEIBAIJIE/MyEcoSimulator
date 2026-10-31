@@ -25,7 +25,7 @@ public sealed class BaselinePersonStrategy : IPersonStrategy
         var action = self.Satiety <= 40 ? new MainAction(ActionKind.Eat, Type: "food", Maximum: StrategyMath.Ceil(100-self.Satiety,20), Conditional:true)
             : resting ? new(ActionKind.Rest) : task is null ? new(ActionKind.Idle) : new(ActionKind.Labor,task.Id);
         long inventory = v.Inventory.Where(l => l.Type == "food").Sum(l => l.Quantity);
-        long reference = v.Markets.Single().ReferencePrice;
+        long reference = v.Markets.Single(m=>m.Tag=="food" && m.Region==self.Location.Region).ReferencePrice;
         long percent = Math.Min(170, (self.Satiety <= 20 ? 150 : self.Satiety <= 40 ? 125 : 100) + Math.Min(20,m.IncompleteOrders / 3 * 10));
         long limit = Math.Max(1,checked(reference * percent) / 100);
         long budget = Math.Max(0,v.Account.Cash - (self.Satiety <= 40 ? 0 : 100));
@@ -99,7 +99,7 @@ public sealed partial class World
             var companies=before.Entities.Where(e => e.Kind==EntityKind.Company).Select(e => {
                 var stable=scenario.Employees.Where(x => x.Company==e.Id).Select(x => x.Person).Distinct().ToArray();
                 var living=Employees.Where(x => x.Company==e.Id).Select(x => x.Person).ToArray();
-                var view=new CompanyView(Turn,e.Id,Report(e.Id),lots.Where(l => l.Owner==e.Id).Sum(l => l.Quantity),before.Markets.Single(),Array.AsReadOnly(stable),Array.AsReadOnly(living),Array.AsReadOnly(scenario.Tasks.Concat(publishedTasks).Where(t => t.Company==e.Id && t.EffectiveTurn>=Turn).ToArray()),EffectiveRecipe(e.Id),scenario.Warehouses.Single(w => w.Organization==e.Id).Location);
+                var view=new CompanyView(Turn,e.Id,Report(e.Id),lots.Where(l => l.Owner==e.Id).Sum(l => l.Quantity),before.Markets.Single(m=>m.Tag=="food" && m.Region==scenario.Warehouses.Single(w=>w.Organization==e.Id).Location.Region),Array.AsReadOnly(stable),Array.AsReadOnly(living),Array.AsReadOnly(scenario.Tasks.Concat(publishedTasks).Where(t => t.Company==e.Id && t.EffectiveTurn>=Turn).ToArray()),EffectiveRecipe(e.Id),scenario.Warehouses.Single(w => w.Organization==e.Id).Location);
                 return (Id:e.Id,Decision:companyStrategy.Decide(view,companyMemories.GetValueOrDefault(e.Id,new())));
             }).ToArray();
             var orders=people.Select(p => p.Order).Concat(companies.Select(c => c.Decision.Order)).OfType<MarketOrder>().ToArray();
@@ -121,16 +121,16 @@ public sealed partial class World
                 long income=actionResults.Any(r => r.Success && r.Reason=="完成劳动") ? before.Tasks.Single(t => t.Employee==p.Intent.Person).Wage : 0;
                 personalMemories[p.Intent.Person]=p.Memory with {
                     IncompleteOrders=StrategyMath.Feedback(p.Memory.IncompleteOrders,p.Order,feedback), LastIncome=income,
-                    LastSpending=(feedback?.Quantity??0)*(result.After.Markets.Single().LatestPrice??0),
+                    LastSpending=(feedback?.Quantity??0)*(result.After.Markets.Single(m=>m.Tag=="food" && m.Region==before.Entities.Single(e=>e.Id==p.Intent.Person).Location.Region).LatestPrice??0),
                     LastUnfilled=p.Order is null ? p.Memory.LastUnfilled : p.Order.Quantity-(feedback?.Quantity??0),
-                    LastPrice=result.After.Markets.Single().LatestPrice, LastOutcome=string.Join("；",actionResults.Select(r => r.Reason)) };
+                    LastPrice=result.After.Markets.Single(m=>m.Tag=="food" && m.Region==before.Entities.Single(e=>e.Id==p.Intent.Person).Location.Region).LatestPrice, LastOutcome=string.Join("；",actionResults.Select(r => r.Reason)) };
             }
             long actual=0,excess=0;
             foreach(var c in companies)
             {
                 var d=c.Decision; var sold=result.Results.SingleOrDefault(r => r.Kind=="order" && r.Subject==d.Order?.Id);
                 long production=result.Results.Where(r => r.Kind=="action" && r.Success && r.Reason=="完成劳动" && before.Tasks.Any(t => t.Company==c.Id && t.Employee==r.Subject)).Sum(r => r.Quantity);
-                long n=sold?.Quantity??0; long revenue=n*(result.After.Markets.Single().LatestPrice??0);
+                long n=sold?.Quantity??0; long revenue=n*(result.After.Markets.Single(m=>m.Tag=="food" && m.Region==scenario.Warehouses.Single(w=>w.Organization==c.Id).Location.Region).LatestPrice??0);
                 var m=d.Memory;
                 excess+=Math.Max(0,m.Produced+production-m.Target)-Math.Max(0,m.Produced-m.Target); actual+=production;
                 companyMemories[c.Id]=m with { Produced=m.Produced+production, Sales=m.Sales+n, Revenue=m.Revenue+revenue, IncompleteOrders=StrategyMath.Feedback(m.IncompleteOrders,d.Order,sold) };

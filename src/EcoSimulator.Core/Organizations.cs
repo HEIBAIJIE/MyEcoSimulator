@@ -7,7 +7,7 @@ public static class OrganizationRules
         bool enabled=s.EnabledMechanisms.Contains("organizations-1");
         void R(bool b,string reason)=>ScenarioLoader.Require(b,reason);
         if(!enabled) { R(s.Organizations.Length==0 && s.TaskPriorities.Length==0 && s.SharedResourceRule is null,"Disabled organization configuration"); return; }
-        R(!s.EnabledMechanisms.Contains("production-1") && s.Regions.Length==1 && s.Schedule.All(c=>c.Output is null),"organizations-1 uses single-region independent hourly recipes; production-1 remains a separate capability");
+        R(!s.EnabledMechanisms.Contains("production-1") && (s.Regions.Length==1 || s.EnabledMechanisms.Contains("space-1")) && s.Schedule.All(c=>c.Output is null),"organizations-1 uses single-region independent hourly recipes; production-1 remains a separate capability");
         R(s.SharedResourceRule=="priority-rotation-1","Missing shared resource arbitration rule");
         var companies=s.Entities.Where(e=>e.Kind==EntityKind.Company).Select(e=>e.Id).ToArray();
         R(s.Organizations.Select(p=>p.Company).Distinct().Count()==companies.Length && s.Organizations.Length==companies.Length,"Each company needs one explicit policy");
@@ -45,7 +45,7 @@ public sealed partial class World
         {
             var warehouse=scenario.Warehouses.Single(w=>w.Organization==policy.Company).Location;
             long stock=lots.Where(l=>l.Owner==policy.Company && l.Type=="food").Sum(l=>l.Quantity);
-            var market=before.Markets.Single(m=>m.Tag=="food");
+            var market=before.Markets.Single(m=>m.Tag=="food" && m.Region==warehouse.Region);
             if(stock>policy.SafetyStock) orders.Add(new($"sell-{Turn}-{policy.Company}",policy.Company,warehouse.Region,"food",OrderSide.Sell,Math.Max(1,market.ReferencePrice*policy.SellPercent/100),stock-policy.SafetyStock));
             long budget=before.Accounts[policy.Company].Cash;
             var memory=companyMemories.GetValueOrDefault(policy.Company,new());
@@ -72,13 +72,13 @@ public sealed partial class World
             var sold=result.Results.SingleOrDefault(r=>r.Kind=="order" && r.Subject==$"sell-{result.Turn}-{policy.Company}")?.Quantity??0;
             var produced=result.Results.Where(r=>r.Kind=="action" && r.Success && r.Reason=="完成劳动" && input.People.Any(p=>p.Person==r.Subject && before.Tasks.Any(t=>t.Id==p.Action.Task && t.Company==policy.Company))).Sum(r=>r.Quantity);
             var memory=companyMemories[policy.Company];
-            companyMemories[policy.Company]=memory with { Produced=memory.Produced+produced,Sales=memory.Sales+sold,Revenue=memory.Revenue+sold*(result.After.Markets.Single().LatestPrice??0) };
+            companyMemories[policy.Company]=memory with { Produced=memory.Produced+produced,Sales=memory.Sales+sold,Revenue=memory.Revenue+sold*(result.After.Markets.Single(m=>m.Region==scenario.Warehouses.Single(w=>w.Organization==policy.Company).Location.Region).LatestPrice??0) };
         }
         foreach(var p in people)
         {
             var feedback=result.Results.SingleOrDefault(r=>r.Kind=="order" && r.Subject==p.Order?.Id);
             var worked=result.Results.Any(r=>r.Subject==p.Intent.Person && r.Kind=="action" && r.Success && r.Reason=="\u5b8c\u6210\u52b3\u52a8");
-            personalMemories[p.Intent.Person]=p.Memory with { IncompleteOrders=StrategyMath.Feedback(p.Memory.IncompleteOrders,p.Order,feedback),LastIncome=worked?before.Tasks.Single(t=>t.Id==p.Intent.Action.Task).Wage:0,LastSpending=(feedback?.Quantity??0)*(result.After.Markets.Single().LatestPrice??0),LastUnfilled=p.Order is null?0:p.Order.Quantity-(feedback?.Quantity??0),LastPrice=result.After.Markets.Single().LatestPrice,LastOutcome=string.Join(";",result.Results.Where(r=>r.Subject==p.Intent.Person && r.Kind=="action").Select(r=>r.Reason)) };
+            personalMemories[p.Intent.Person]=p.Memory with { IncompleteOrders=StrategyMath.Feedback(p.Memory.IncompleteOrders,p.Order,feedback),LastIncome=worked?before.Tasks.Single(t=>t.Id==p.Intent.Action.Task).Wage:0,LastSpending=(feedback?.Quantity??0)*(result.After.Markets.Single(m=>m.Region==before.Entities.Single(e=>e.Id==p.Intent.Person).Location.Region).LatestPrice??0),LastUnfilled=p.Order is null?0:p.Order.Quantity-(feedback?.Quantity??0),LastPrice=result.After.Markets.Single(m=>m.Region==before.Entities.Single(e=>e.Id==p.Intent.Person).Location.Region).LatestPrice,LastOutcome=string.Join(";",result.Results.Where(r=>r.Subject==p.Intent.Person && r.Kind=="action").Select(r=>r.Reason)) };
         }
         var history=new AutonomousTurn(result,input,tasks,decisions,tasks.Sum(t=>t.Output),result.Results.Where(r=>r.Kind=="action" && r.Success && r.Reason=="完成劳动").Sum(r=>r.Quantity),0);
         autonomousHistory.Add(history); return history;

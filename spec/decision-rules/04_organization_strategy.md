@@ -11,3 +11,5 @@
 view只提供查看；pickup与custody同时具备才可把组织货物装入个人物品栏；carry才可携带其移动；drop才可放下；consume才可消费；sell才可代企业出售。MarketOrder.Actor为空表示经济实体自身决策，非空时必须是存活人员，代表其他实体只允许获得该实体sell授权的卖单，现金与收入仍归被代表实体。持股、员工、成员和职位不推导上述权限。权限按组织标识匹配，不跨组织继承。
 
 无成员、无员工、暂停不解散组织。缺勤或选择其他任务、工资不足、静态权限失败和策略暂停分别保留结果或决策记录。当前不启用共享工具、管理、择业、辞退、融资分红或组织成立解散。
+
+space-1 permits predefined multiple regions. Companies use warehouse-region prices; persons use committed-location-region prices. Each regional market clears independently.

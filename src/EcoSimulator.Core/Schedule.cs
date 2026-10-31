@@ -20,6 +20,8 @@ public static class Variants
         var s=Baseline.Create();
         return name switch {
             "baseline" => s,
+            "space" => SpatialScenarios.Create(),
+            "environment" => SpatialScenarios.Create(true),
             "production" => ProductionScenario.Create(),
             "organizations" => OrganizationScenario.Create(),
             "no-resident-cash" => s with { Name=name, ConfigurationVersion=name, Cash=s.Cash.Select(c => c.Entity.StartsWith("P") ? c with { Amount=0 } : c).ToArray(), Issuance=200000 },

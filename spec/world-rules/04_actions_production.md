@@ -147,3 +147,17 @@ production-1 执行边界：步骤数组长度等于时长，各步工资与产�
 
 当前阶段暂不考虑区域内物流。
 
+
+## space-1 timing
+
+The starting turn is step 1. Travel started at t=0 arrives in stage 7 at t=23; trading resumes at t=24. Natural needs remain frozen on the arrival turn. Missing intents continue transport; an explicit different action interrupts it. Interruption and death leave the person at the origin; restarting begins at step 1. Travel cannot include local movement or free interactions.
+
+HaulTurns must be an explicit positive integer. Hauling exclusively reserves the entire nonportable lot and rechecks origin and carry authorization each turn. Unowned hauling is not enabled. Person and lot move together only upon completion; interruption leaves both at the origin. Existing resource arbitration applies without reassignment of failed claims.
+
+## environment-1 content and construction
+
+Terrain cells sparsely override the scenario default. Unregionalized macro tiles retain the default; regional macro tiles do not duplicate terrain. Buildings require a full rectangle of artificial surfaces. Building ownership does not change component ownership. Initial people, lots, warehouses and tasks use the building anchor; local moves into other building cells normalize to the anchor.
+
+Construction is one complete hourly labor-only step, with Output=1, explicit site condition, surface type, dimensions, building flag and RestBonus. Material or multi-step construction is rejected. Output belongs to the task company; wages are expensed without fictional inventory. Buildings and surfaces are not valued or traded. Stage 7 resolves spatial conflicts in actual commit order: first valid construction wins, later conflicts neither overwrite nor pay wages. New buildings cannot qualify another labor action in the same turn.
+
+Construction normalizes occupants and lots to the anchor. Construction cannot cover non-anchor fixed warehouses, public task locations, or active transport endpoints. Site conditions are checked in stage 3. RestBonus is a nonnegative integer added once to actual stage-7 rest recovery, capped by the maximum; stage 8 does not apply it again.

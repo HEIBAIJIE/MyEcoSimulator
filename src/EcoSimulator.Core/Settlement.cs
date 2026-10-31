@@ -1,7 +1,11 @@
 namespace EcoSimulator.Core;
 
-public enum ActionKind { Idle, Eat, Rest, Labor }
-public sealed record MainAction(ActionKind Kind, string? Task = null, string? Type = null, long Minimum = 1, long Maximum = 1, bool Conditional = false);
+public enum ActionKind { Idle, Eat, Rest, Labor, Travel, Haul }
+public sealed record MainAction(ActionKind Kind, string? Task = null, string? Type = null, long Minimum = 1, long Maximum = 1, bool Conditional = false)
+{
+    public Tile? Target { get; init; }
+    public string? Lot { get; init; }
+}
 public sealed record ItemInteraction(string Lot, bool PickUp);
 public sealed record PersonIntent(string Person, Tile? Destination, MainAction Action, IReadOnlyList<ItemInteraction> Interactions, string Reason);
 public sealed record TurnInput(IReadOnlyList<PersonIntent> People, IReadOnlyList<MarketOrder> Orders);
@@ -11,6 +15,9 @@ public sealed record PersonStatus(string Person, string Kind, long FirstTurn, lo
 public sealed record StateFact(long Turn, int Stage, string Subject, string Kind, string Input, string Output);
 public sealed record ObserverSnapshot(long Turn, IReadOnlyList<Entity> Entities, IReadOnlyList<Lot> Lots, IReadOnlyDictionary<string,BalanceSheet> Accounts, IReadOnlyList<Market> Markets, IReadOnlyList<WorkTask> Tasks)
 {
+    public IReadOnlyList<TransportProgress> Transport { get; init; } = [];
+    public EnvironmentConfiguration? Environment { get; init; }
+    public IReadOnlyList<Region> Regions { get; init; } = [];
     public IReadOnlyList<Employee> Jobs { get; init; } = [];
     public IReadOnlyList<ActionProgress> Production { get; init; } = [];
 }
@@ -39,26 +46,29 @@ public sealed partial class World
     {
         lock(gate) return new(Turn,Array.AsReadOnly(People.Values.ToArray()),Lots,
             scenario.Entities.ToDictionary(e => e.Id,e => Report(e.Id)).AsReadOnly(),Array.AsReadOnly((currentMarkets ?? scenario.Markets).ToArray()),
-            Array.AsReadOnly(scenario.Tasks.Concat(publishedTasks).Where(t => (t.EffectiveTurn==Turn || productionProgress.Values.Any(p => p.Task==t.Id && p.State=="running")) && People[t.Employee].Health>0).ToArray())) { Production=ProductionProgress, Jobs=Employees };
+            Array.AsReadOnly(scenario.Tasks.Concat(publishedTasks).Where(t => (t.EffectiveTurn==Turn || productionProgress.Values.Any(p => p.Task==t.Id && p.State=="running")) && People[t.Employee].Health>0).ToArray())) { Production=ProductionProgress, Jobs=Employees, Transport=transport.Values.ToArray(), Environment=currentEnvironment??scenario.Environment, Regions=scenario.Regions };
     }
     public DecisionView View(string entity)
     {
         lock(gate) { var snap=Snapshot(); var self=People[entity];
             return new(Turn,self,Report(entity),Array.AsReadOnly(lots.Where(l => l.Owner==entity || l.Owner is not null && scenario.Authorizations.Contains(new(entity,l.Owner,"view"))).ToArray()),Array.AsReadOnly(scenario.Authorizations.Where(a => a.Person==entity).ToArray()),
-                Array.AsReadOnly(snap.Tasks.Where(t => t.Employee==entity || t.Company==entity).ToArray()),snap.Markets); }
+                Array.AsReadOnly(snap.Tasks.Where(t => t.Employee==entity || t.Company==entity).ToArray()),Array.AsReadOnly(snap.Markets.Where(m=>m.Region==(self.Kind==EntityKind.Person?self.Location:scenario.Warehouses.Single(w=>w.Organization==entity).Location).Region).ToArray())); }
     }
     public TurnResult Advance(TurnInput supplied)
     {
         lock(gate)
         {
             ScenarioLoader.Require(!Paused,"非法状态已暂停");
-            var input = new TurnInput(supplied.People.Concat(productionProgress.Values.Where(p => p.State=="running" && !supplied.People.Any(i => i.Person==p.Person)).Select(p => new PersonIntent(p.Person,null,new(ActionKind.Labor,p.Task),[],"Continue active production"))).Select(p => p with { Interactions=Array.AsReadOnly(p.Interactions.ToArray()) }).ToArray(), supplied.Orders.ToArray());
+            var input = new TurnInput(supplied.People.Concat(transport.Values.Where(p => p.State=="running" && !supplied.People.Any(i => i.Person==p.Person)).Select(p => new PersonIntent(p.Person,null,new MainAction(p.Kind) { Target=p.Target,Lot=p.Lot },[],"Continue transport"))).Concat(productionProgress.Values.Where(p => p.State=="running" && !supplied.People.Any(i => i.Person==p.Person)).Select(p => new PersonIntent(p.Person,null,new(ActionKind.Labor,p.Task),[],"Continue active production"))).Select(p => p with { Interactions=Array.AsReadOnly(p.Interactions.ToArray()) }).ToArray(), supplied.Orders.ToArray());
             var before=Snapshot(); var oldBalances=new Dictionary<(string,Account),long>(balances); var oldLots=lots.ToArray(); var oldEvents=events.Count;
+            var oldEnvironment=currentEnvironment;
+            var oldTransport = new Dictionary<string,TransportProgress>(transport);
             var oldProgress = new Dictionary<string,ActionProgress>(productionProgress);
             var oldPeople=People.ToDictionary(x => x.Key,x => x.Value); var oldMarkets=currentMarkets; var oldShares=currentShares; var oldStatuses=statuses.ToArray(); var oldTrades=trades.Count;
             try { return Settle(input,before); }
             catch(Exception e) when(e is RuleException or OverflowException or InvalidOperationException or ArgumentException)
             {
+                currentEnvironment=oldEnvironment; transport.Clear(); foreach(var p in oldTransport) transport.Add(p.Key,p.Value);
                 balances=oldBalances; lots=oldLots; events.RemoveRange(oldEvents,events.Count-oldEvents); currentEntities=oldPeople; currentMarkets=oldMarkets; currentShares=oldShares;
                 statuses.Clear(); statuses.AddRange(oldStatuses); trades.RemoveRange(oldTrades,trades.Count-oldTrades);
                 productionProgress.Clear(); foreach(var p in oldProgress) productionProgress.Add(p.Key,p.Value);
@@ -70,7 +80,7 @@ public sealed partial class World
     {
         ScenarioLoader.Require(input.People.Select(p => p.Person).Distinct().Count()==input.People.Count && input.Orders.Select(o => o.Id).Distinct().Count()==input.Orders.Count,"重复意图标识");
         var results=new List<IntentResult>(); var reservations=new List<Reservation>(); var facts=new List<StateFact>();
-        void Fact(int stage,string subject,string kind,object a,object b) => facts.Add(new(Turn,stage,subject,kind,System.Text.Json.JsonSerializer.Serialize(a),System.Text.Json.JsonSerializer.Serialize(b)));
+        void Fact(int stage,string subject,string kind,object? a,object? b) => facts.Add(new(Turn,stage,subject,kind,System.Text.Json.JsonSerializer.Serialize(a),System.Text.Json.JsonSerializer.Serialize(b)));
         void Result(string subject,string kind,bool ok,string reason,long n=0) => results.Add(new(subject,kind,ok,reason,n));
         void Post(int stage,string subject,string reason,IEnumerable<Lot> inventory,params Entry[] entries)
         { var prior=lots.ToArray(); Commit(new(Guid.NewGuid().ToString("N"),reason,Turn,stage.ToString(),entries),inventory); Fact(stage,subject,reason,prior.Where(l => !lots.Contains(l)).ToArray(),new { Lots=lots.Where(l => !prior.Contains(l)).ToArray(),Entries=entries }); }
@@ -79,13 +89,15 @@ public sealed partial class World
         foreach(var p in input.People)
         {
             if(!People.TryGetValue(p.Person,out var person) || person.Kind!=EntityKind.Person || person.Health==0) { Result(p.Person,"intent",false,"主体不存在或已死亡"); continue; }
-            bool move=true; var destination=p.Destination ?? person.Location;
+            bool move=true; var destination=EnvironmentRules.Normalize(SpatialScenario,p.Destination ?? person.Location);
             if(destination!=person.Location && lots.Any(l=>l.Location.Inventory==p.Person && l.Owner!=p.Person && l.Owner is not null && !scenario.Authorizations.Contains(new(p.Person,l.Owner,"carry")))) move=false;
             try { scenario.Regions.Single(r => r.Id==person.Location.Region).Validate(destination); } catch(RuleException) { move=false; }
             validMove[p.Person]=move; destinations[p.Person]=move?destination:person.Location;
             var a=p.Action; bool ok=Enum.IsDefined(a.Kind);
+            if(transport.TryGetValue(p.Person,out var activeTransport) && activeTransport.State=="running" && a.Kind==activeTransport.Kind && a.Target==activeTransport.Target && a.Lot==activeTransport.Lot) move &= destination==person.Location;
+            if(a.Kind is ActionKind.Travel or ActionKind.Haul) { ok &= TransportValid(p.Person,a,destination) && p.Destination is null && p.Interactions.Count==0; destination=person.Location; destinations[p.Person]=destination; }
             if(a.Kind==ActionKind.Eat) ok &= move && a.Minimum>0 && a.Maximum>=a.Minimum && scenario.ItemTypes.Any(t => t.Id==a.Type && t.Satiety>0);
-            if(a.Kind==ActionKind.Labor) ok &= move && before.Tasks.Any(t => t.Id==a.Task && t.Employee==p.Person && t.Location==destination && scenario.Authorizations.Contains(new(p.Person,t.Company,"labor")));
+            if(a.Kind==ActionKind.Labor) ok &= move && before.Tasks.Any(t => t.Id==a.Task && t.Employee==p.Person && t.Location==destination && EnvironmentRules.Matches(SpatialScenario,scenario.Recipes.Single(r=>r.Id==t.Recipe).Site,destination) && scenario.Authorizations.Contains(new(p.Person,t.Company,"labor")));
             if(!ok) { Result(p.Person,"action",false,"静态预检失败"); a=new(ActionKind.Idle); }
             actions[p.Person]=a;
             Fact(2,p.Person,"intent",p,a);
@@ -111,6 +123,10 @@ public sealed partial class World
             actionLots[p.Person]=[]; long needed=Math.Min(available,a.Maximum);
             foreach(var l in candidates.Where(l => !claimed.ContainsKey(l.Id))) { if(needed<=0) break; claimed[l.Id]=p.Person; actionLots[p.Person].Add(l.Id); reservations.Add(new(p.Person,"eat",l.Id,Math.Min(needed,l.Quantity),Turn)); needed-=l.Quantity; }
         }
+        foreach(var progress in transport.Values.Where(p=>p.State=="running").ToArray())
+        { if(!actions.TryGetValue(progress.Person,out var next) || next.Kind!=progress.Kind || next.Target!=progress.Target || next.Lot!=progress.Lot) { transport[progress.Person]=progress with { State="interrupted" }; Fact(3,progress.Person,"transport-interrupted",progress,transport[progress.Person]); } }
+        foreach(var x in actions.Where(x=>x.Value.Kind==ActionKind.Haul).OrderBy(_=>Random.Shared.NextInt64()).ToArray())
+        { var id=x.Value.Lot!; if(claimed.ContainsKey(id)) { actions[x.Key]=new(ActionKind.Idle); Result(x.Key,"action",false,"Haul resource already reserved"); } else { claimed[id]=x.Key; reservations.Add(new(x.Key,"haul",id,lots.Single(l=>l.Id==id).Quantity,Turn)); } }
         var cash=before.Accounts.ToDictionary(x => x.Key,x => x.Value.Cash);
         foreach(var group in actions.Where(x => x.Value.Kind==ActionKind.Labor).GroupBy(x => before.Tasks.Single(t => t.Id==x.Value.Task).Company))
         {
@@ -149,19 +165,19 @@ public sealed partial class World
         var validOrders=new List<MarketOrder>(); var sellLots=new Dictionary<string,Lot[]>();
         foreach(var o in input.Orders)
         {
-            bool ok=People.TryGetValue(o.Entity,out var entity) && (entity.Kind!=EntityKind.Person || entity.Health>0) && o.Quantity>0 && o.Limit>0 && Enum.IsDefined(o.Side) && scenario.Markets.Any(m => m.Region==o.Region && m.Tag==o.Tag);
+            bool ok=People.TryGetValue(o.Entity,out var entity) && (entity.Kind!=EntityKind.Person || entity.Health>0) && o.Quantity>0 && o.Limit>0 && scenario.ItemTypes.Where(t=>t.Tag==o.Tag).All(t=>t.Portable) && Enum.IsDefined(o.Side) && scenario.Markets.Any(m => m.Region==o.Region && m.Tag==o.Tag);
             ok &= input.Orders.Count(x => x.Entity==o.Entity && x.Region==o.Region && x.Tag==o.Tag)==1;
             if(entity!=null)
             {
                 var location=entity.Kind==EntityKind.Person?entity.Location:scenario.Warehouses.Single(w => w.Organization==entity.Id).Location;
-                ok &= location.Region==o.Region && (!actions.TryGetValue(o.Entity,out var a) || a.Kind!=ActionKind.Rest);
+                ok &= location.Region==o.Region && (!actions.TryGetValue(o.Entity,out var a) || a.Kind is not (ActionKind.Rest or ActionKind.Travel));
                 ok &= o.Side==OrderSide.Buy ? (entity.Kind==EntityKind.Person || scenario.EnabledMechanisms.Contains("production-1")) : (entity.Kind==EntityKind.Company || scenario.EnabledMechanisms.Contains("production-1"));
             }
             if(o.Actor is not null) ok &= People.TryGetValue(o.Actor,out var actor) && actor.Kind==EntityKind.Person && actor.Health>0 && (o.Actor==o.Entity || o.Side==OrderSide.Sell && scenario.Authorizations.Contains(new(o.Actor,o.Entity,"sell")));
             if(ok && o.Side==OrderSide.Buy) { var budget=checked(o.Limit*o.Quantity); ok=cash[o.Entity]>=budget; if(ok) { cash[o.Entity]-=budget; reservations.Add(new(o.Id,"buy",o.Entity,budget,Turn)); } }
             if(ok && o.Side==OrderSide.Sell)
             {
-                var stock=lots.Where(l => l.Owner==o.Entity && scenario.ItemTypes.Single(t => t.Id==l.Type).Tag==o.Tag && !claimed.ContainsKey(l.Id)).ToArray();
+                var stock=lots.Where(l => l.Owner==o.Entity && scenario.ItemTypes.Single(t => t.Id==l.Type).Tag==o.Tag && !claimed.ContainsKey(l.Id) && (l.Location.Inventory==o.Entity || l.Location.Tile is { } tile && tile.Region==o.Region)).ToArray();
                 stock=stock.Where(l => l.RemainingDurability is null).ToArray();
                 ok=stock.Sum(l => l.Quantity)>=o.Quantity;
                 if(ok) { var type=stock[0].Type; ok=stock.All(l => l.Type==type); if(ok) { var taken=Inventory.TakeFifo(stock,o.Entity,type,o.Quantity).Taken; sellLots[o.Id]=taken; foreach(var l in stock) claimed[l.Id]=o.Id; foreach(var l in taken) reservations.Add(new(o.Id,"sell",l.Source+":"+l.Start,l.Quantity,Turn)); } }
@@ -208,7 +224,8 @@ public sealed partial class World
                 {
                     var seller=supply.Dequeue(); long n=Math.Min(left,seller.Quantity); long amount=checked(n*clear.Price!.Value);
                     var type=sellLots[seller.Order.Id][0].Type;
-                    var stock=Inventory.TakeFifo(candidate,seller.Order.Entity,type,n); candidate=stock.Remaining.ToList();
+                    var eligible=candidate.Where(l=>sellLots[seller.Order.Id].Any(v=>v.Source==l.Source && v.Start<=l.Start && l.Start<v.Start+v.Quantity)).ToArray();
+                    var stock=Inventory.TakeFifo(eligible,seller.Order.Entity,type,n); candidate=candidate.Except(eligible).Concat(stock.Remaining).ToList();
                     long cost=stock.Taken.Sum(l => l.Cost);
                     foreach(var l in stock.Taken) Fact(5,buyer.Id,"delivery",l,new { Owner=buyer.Entity,Quantity=l.Quantity,Price=clear.Price });
                     var id=Guid.NewGuid().ToString("N"); long seq=marketSequence++;
@@ -239,7 +256,7 @@ public sealed partial class World
             if(x.Value.Kind==ActionKind.Labor)
             { var t=before.Tasks.Single(t => t.Id==x.Value.Task); if(People[x.Key].Location!=t.Location || Report(t.Company).Cash<t.Wage || IsStepped(t) && (x.Value.Conditional ? !SelectProduction(x.Key,t,true) : productionMaterials[x.Key].Any(part => !lots.Any(l => l.Source==part.Source && l.Start==part.Start && l.Quantity>=part.Quantity && l.Owner==part.Owner && Accessible(l,x.Key))) || productionTools[x.Key].Any(tool => !lots.Any(l => l.Id==tool.Id && l.RemainingDurability>=tool.Wear && Accessible(l,x.Key))))) { actions[x.Key]=new(ActionKind.Idle); Result(x.Key,"action",false,"执行前劳动条件失效"); } }
         }
-        foreach(var x in actions)
+        foreach(var x in actions.ToArray())
         {
             var p=People[x.Key]; var a=x.Value;
             if(a.Kind==ActionKind.Eat)
@@ -260,6 +277,12 @@ public sealed partial class World
             else if(a.Kind==ActionKind.Labor)
             {
                 var t=before.Tasks.Single(t => t.Id==a.Task);
+                if(scenario.Recipes.Single(r=>r.Id==t.Recipe).Construction is not null)
+                {
+                    if(!ConstructionValid(t)) { Result(x.Key,"action",false,"Construction space conflict; no inputs or wage consumed"); actions[x.Key]=new(ActionKind.Idle); continue; }
+                    Post(7,x.Key,"construction-wage",lots,C(t.Company,Account.Cash,t.Wage),D(t.Company,Account.RetainedEarnings,t.Wage),D(x.Key,Account.Cash,t.Wage),C(x.Key,Account.RetainedEarnings,t.Wage));
+                    Construct(t); Fact(7,x.Key,"construction",t,currentEnvironment!); Result(x.Key,"action",true,"Construction completed",1); continue;
+                }
                 if(IsStepped(t))
                 {
                     var step=Step(t); var candidate=lots.ToList(); var entries=new List<Entry>(); long cost=step.Wage;
@@ -293,13 +316,24 @@ public sealed partial class World
                 var product=new Lot(id,id,seq,t.Output,t.Wage,0,t.Output,recipe.OutputType,t.Company,new(scenario.Warehouses.Single(w => w.Organization==t.Company).Location,null),t.Company);
                 Post(7,x.Key,"劳动工资与产品成本",[..lots,product],C(t.Company,Account.Cash,t.Wage),D(t.Company,Account.Inventory,t.Wage),D(x.Key,Account.Cash,t.Wage),C(x.Key,Account.RetainedEarnings,t.Wage)); Result(x.Key,"action",true,"完成劳动",t.Output);
             }
-            else if(a.Kind==ActionKind.Rest) { People[x.Key]=p with { Energy=Math.Min(EffectiveWorld.Maximum,checked(p.Energy+EffectiveWorld.RestRecovery)) }; Fact(7,x.Key,"rest",p,People[x.Key]); Result(x.Key,"action",true,"完成休息"); }
+            else if(a.Kind is ActionKind.Travel or ActionKind.Haul)
+            {
+                var prior=transport.GetValueOrDefault(x.Key); var continuing=prior is not null && prior.State=="running" && prior.Kind==a.Kind && prior.Target==a.Target && prior.Lot==a.Lot;
+                var progress=new TransportProgress(x.Key,a.Kind,p.Location,a.Target!.Value,a.Lot,continuing?prior!.Started:Turn,continuing?prior!.Completed+1:1,a.Kind==ActionKind.Travel?24:scenario.Space!.HaulTurns,"running");
+                if(progress.Completed==progress.Required)
+                {
+                    if(a.Kind==ActionKind.Haul) Post(7,x.Key,"haul-arrival",lots.Select(l=>l.Id==a.Lot?l with { Location=new(progress.Target,null) }:l));
+                    People[x.Key]=p with { Location=progress.Target }; progress=progress with { State="completed" };
+                }
+                transport[x.Key]=progress; Fact(7,x.Key,"transport",prior,progress); Result(x.Key,"action",true,progress.State,progress.Completed);
+            }
+            else if(a.Kind==ActionKind.Rest) { People[x.Key]=p with { Energy=Math.Min(EffectiveWorld.Maximum,checked(p.Energy+EffectiveWorld.RestRecovery+EnvironmentRules.RestBonus(SpatialScenario,p.Location))) }; Fact(7,x.Key,"rest",p,People[x.Key]); Result(x.Key,"action",true,"完成休息"); }
             else Result(x.Key,"action",true,"实际闲置");
         }
         foreach(var p in People.Values.Where(e => e.Kind==EntityKind.Person && e.Health>0).ToArray())
         {
             var a=actions.GetValueOrDefault(p.Id,new(ActionKind.Idle)); var w=EffectiveWorld;
-            long satiety=a.Kind==ActionKind.Eat?p.Satiety:Math.Max(0,p.Satiety-w.SatietyDecay), energy=a.Kind==ActionKind.Rest?p.Energy:Math.Max(0,p.Energy-w.EnergyDecay);
+            long satiety=a.Kind is ActionKind.Eat or ActionKind.Travel?p.Satiety:Math.Max(0,p.Satiety-w.SatietyDecay), energy=a.Kind is ActionKind.Rest or ActionKind.Travel?p.Energy:Math.Max(0,p.Energy-w.EnergyDecay);
             void Status(string name,bool active) { var prior=statuses.SingleOrDefault(s => s.Person==p.Id && s.Kind==name); statuses.RemoveAll(s => s.Person==p.Id && s.Kind==name); if(active) statuses.Add(new(p.Id,name,prior?.FirstTurn??Turn,Turn)); }
             Status("hunger",satiety==0); Status("fatigue",energy==0);
             var damage=checked((satiety==0?w.HungerDamage:0)+(energy==0?w.FatigueDamage:0));
@@ -314,6 +348,7 @@ public sealed partial class World
             currentShares=(currentShares??scenario.Shares).Select(h => h.Holder==p.Id?h with { Holder=scenario.Issuer }:h).ToArray();
             Fact(9,p.Id,"关系清理",scenario.Memberships.Where(m => m.Person==p.Id),"死亡者不再参与任务及成员活动");
         }
+        foreach(var progress in transport.Values.Where(p=>p.State=="running" && People[p.Person].Health==0).ToArray()) { transport[progress.Person]=progress with { State="interrupted" }; Fact(9,progress.Person,"transport-death",progress,transport[progress.Person]); }
         foreach(var p in productionProgress.Values.Where(p => p.State=="running").ToArray())
             if(!actions.TryGetValue(p.Person,out var action) || action.Kind!=ActionKind.Labor || action.Task!=p.Task || People[p.Person].Health==0)
             { var interrupted=p with { State="interrupted" }; productionProgress[p.Person]=interrupted; Fact(9,p.Person,"production-interrupted",p,interrupted); }
