@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 namespace EcoSimulator.Core;
@@ -31,7 +31,7 @@ public static class ScenarioLoader
     {
         void R(bool b, string message) => Require(b, message);
         R(!string.IsNullOrWhiteSpace(s.Name) && s.RuleVersion == "0.3" && !string.IsNullOrWhiteSpace(s.ConfigurationVersion), "不支持的版本或空名称");
-        R(s.EnabledMechanisms.Length == 0, "F01不支持启用扩展机制");
+        R(s.EnabledMechanisms.Length == 0, "当前阶段不支持启用扩展机制");
         R(s.Terrain == "flat" && s.DeathInvestmentPolicy == "confiscate", "不支持的地形或股权死亡机制");
         R(s.World.Version == "0.3" && s.Strategy.Version == "baseline-1", "不支持的参数版本");
         R(s.World.Maximum > 0 && new[] { s.World.SatietyDecay, s.World.EnergyDecay, s.World.RestRecovery, s.World.HungerDamage, s.World.FatigueDamage, s.World.HealthyThreshold, s.World.HealthRecovery }.All(x => x >= 0) && s.World.HealthyThreshold <= s.World.Maximum, "世界参数非法");
@@ -60,7 +60,7 @@ public static class ScenarioLoader
         foreach (var p in s.Entities.Where(x => x.Kind == EntityKind.Person)) R(s.Memberships.Contains(new(p.Id, s.Issuer)), "个人必须属于国家");
         foreach (var e in s.Employees) R(Kind(e.Person, EntityKind.Person) && Kind(e.Company, EntityKind.Company) && !string.IsNullOrWhiteSpace(e.Job), "员工引用非法");
         R(s.Positions.Length == 0, "本阶段不支持额外职位");
-        foreach (var a in s.Authorizations) R(Kind(a.Person, EntityKind.Person) && Kind(a.Organization, EntityKind.Company) && a.Permission == "labor" && s.Employees.Any(e => e.Person == a.Person && e.Company == a.Organization), "不支持的授权");
+        foreach (var a in s.Authorizations) R(Kind(a.Person, EntityKind.Person) && Kind(a.Organization, EntityKind.Company) && new[] { "labor", "view", "custody", "pickup", "drop", "consume" }.Contains(a.Permission) && (a.Permission != "labor" || s.Employees.Any(e => e.Person == a.Person && e.Company == a.Organization)), "不支持的授权");
         R(s.Warehouses.Select(x => x.Organization).Distinct().Count() == s.Warehouses.Length, "重复仓库");
         foreach (var w in s.Warehouses) { R(entities.ContainsKey(w.Organization) && !Kind(w.Organization, EntityKind.Person), "仓库引用非法"); TileCheck(w.Location); }
         foreach (var c in s.Entities.Where(e => e.Kind != EntityKind.Person)) R(s.Warehouses.Any(w => w.Organization == c.Id), "组织缺少固定仓库");
@@ -88,4 +88,3 @@ public static class ScenarioLoader
         Inventory.Validate(s.Lots, entities, types, TileCheck);
     }
 }
-

@@ -38,7 +38,7 @@ public static class Inventory
         return (taken.ToArray(), remaining.ToArray());
     }
 }
-public sealed class World
+public sealed partial class World
 {
     private Dictionary<(string,Account),long> balances = new();
     private Lot[] lots = [];
