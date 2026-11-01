@@ -1,0 +1,2475 @@
+{
+  "actions": {
+    "Labor": 650,
+    "Idle": 10950,
+    "Rest": 2340,
+    "Eat": 460
+  },
+  "synchronizedTurns": {
+    "Labor": 22,
+    "Idle": 537,
+    "Rest": 117,
+    "Eat": 23
+  },
+  "positions": [
+    [
+      "R0",
+      "0",
+      "0"
+    ]
+  ],
+  "failures": [],
+  "first55": [
+    [
+      0,
+      {
+        "Labor": 20
+      }
+    ],
+    [
+      1,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      2,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      3,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      4,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      5,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      6,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      7,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      8,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      9,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      10,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      11,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      12,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      13,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      14,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      15,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      16,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      17,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      18,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      19,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      20,
+      {
+        "Rest": 20
+      }
+    ],
+    [
+      21,
+      {
+        "Rest": 20
+      }
+    ],
+    [
+      22,
+      {
+        "Rest": 20
+      }
+    ],
+    [
+      23,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      24,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      25,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      26,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      27,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      28,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      29,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      30,
+      {
+        "Eat": 20
+      }
+    ],
+    [
+      31,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      32,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      33,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      34,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      35,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      36,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      37,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      38,
+      {
+        "Rest": 20
+      }
+    ],
+    [
+      39,
+      {
+        "Rest": 20
+      }
+    ],
+    [
+      40,
+      {
+        "Rest": 20
+      }
+    ],
+    [
+      41,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      42,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      43,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      44,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      45,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      46,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      47,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      48,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      49,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      50,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      51,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      52,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      53,
+      {
+        "Idle": 20
+      }
+    ],
+    [
+      54,
+      {
+        "Idle": 20
+      }
+    ]
+  ],
+  "daily": [
+    {
+      "day": 1,
+      "alive": 20,
+      "health": 100,
+      "actions": {
+        "Labor": 20,
+        "Idle": 400,
+        "Rest": 60
+      },
+      "cash": "198000",
+      "metrics": {
+        "Turn": "23",
+        "Version": "town-1",
+        "Price": null,
+        "ReferencePrice": "100",
+        "DeclaredDemand": "0",
+        "DeclaredSupply": "140",
+        "EffectiveDemand": "0",
+        "EffectiveSupply": "140",
+        "Volume": "0",
+        "UnfilledDemand": "0",
+        "UnfilledSupply": "140",
+        "Production": "0",
+        "Consumption": "0",
+        "Food": "220",
+        "FoodCost": "20000",
+        "ResidentCash": "202000",
+        "CashDistribution": [
+          "10100",
+          "10100",
+          "10100",
+          "10100",
+          "10100",
+          "10100",
+          "10100",
+          "10100",
+          "10100",
+          "10100",
+          "10100",
+          "10100",
+          "10100",
+          "10100",
+          "10100",
+          "10100",
+          "10100",
+          "10100",
+          "10100",
+          "10100"
+        ],
+        "CompanyCash": "198000",
+        "CountryCash": "0",
+        "Wages": "0",
+        "FoodSpending": "0",
+        "Confiscation": "0",
+        "AttendanceDenominator": "0",
+        "Attendance": null,
+        "Hunger": "0",
+        "Deaths": "0",
+        "Stockouts": "0",
+        "StopReasons": [
+          "无新任务：参见企业决策输入、目标、工资预算及公开日程"
+        ]
+      }
+    },
+    {
+      "day": 2,
+      "alive": 20,
+      "health": 100,
+      "actions": {
+        "Idle": 400,
+        "Eat": 20,
+        "Rest": 60
+      },
+      "cash": "203700",
+      "metrics": {
+        "Turn": "47",
+        "Version": "town-1",
+        "Price": null,
+        "ReferencePrice": "95",
+        "DeclaredDemand": "0",
+        "DeclaredSupply": "60",
+        "EffectiveDemand": "0",
+        "EffectiveSupply": "60",
+        "Volume": "0",
+        "UnfilledDemand": "0",
+        "UnfilledSupply": "60",
+        "Production": "0",
+        "Consumption": "0",
+        "Food": "160",
+        "FoodCost": "13700",
+        "ResidentCash": "196300",
+        "CashDistribution": [
+          "9815",
+          "9815",
+          "9815",
+          "9815",
+          "9815",
+          "9815",
+          "9815",
+          "9815",
+          "9815",
+          "9815",
+          "9815",
+          "9815",
+          "9815",
+          "9815",
+          "9815",
+          "9815",
+          "9815",
+          "9815",
+          "9815",
+          "9815"
+        ],
+        "CompanyCash": "203700",
+        "CountryCash": "0",
+        "Wages": "0",
+        "FoodSpending": "0",
+        "Confiscation": "0",
+        "AttendanceDenominator": "0",
+        "Attendance": null,
+        "Hunger": "0",
+        "Deaths": "0",
+        "Stockouts": "0",
+        "StopReasons": [
+          "无新任务：参见企业决策输入、目标、工资预算及公开日程"
+        ]
+      }
+    },
+    {
+      "day": 3,
+      "alive": 20,
+      "health": 100,
+      "actions": {
+        "Idle": 400,
+        "Rest": 60,
+        "Eat": 20
+      },
+      "cash": "209100",
+      "metrics": {
+        "Turn": "71",
+        "Version": "town-1",
+        "Price": null,
+        "ReferencePrice": "92",
+        "DeclaredDemand": "0",
+        "DeclaredSupply": "0",
+        "EffectiveDemand": "0",
+        "EffectiveSupply": "0",
+        "Volume": "0",
+        "UnfilledDemand": "0",
+        "UnfilledSupply": "0",
+        "Production": "0",
+        "Consumption": "0",
+        "Food": "100",
+        "FoodCost": "8300",
+        "ResidentCash": "190900",
+        "CashDistribution": [
+          "9545",
+          "9545",
+          "9545",
+          "9545",
+          "9545",
+          "9545",
+          "9545",
+          "9545",
+          "9545",
+          "9545",
+          "9545",
+          "9545",
+          "9545",
+          "9545",
+          "9545",
+          "9545",
+          "9545",
+          "9545",
+          "9545",
+          "9545"
+        ],
+        "CompanyCash": "209100",
+        "CountryCash": "0",
+        "Wages": "0",
+        "FoodSpending": "0",
+        "Confiscation": "0",
+        "AttendanceDenominator": "0",
+        "Attendance": null,
+        "Hunger": "0",
+        "Deaths": "0",
+        "Stockouts": "0",
+        "StopReasons": []
+      }
+    },
+    {
+      "day": 4,
+      "alive": 20,
+      "health": 100,
+      "actions": {
+        "Labor": 30,
+        "Rest": 120,
+        "Idle": 310,
+        "Eat": 20
+      },
+      "cash": "206100",
+      "metrics": {
+        "Turn": "95",
+        "Version": "town-1",
+        "Price": null,
+        "ReferencePrice": "92",
+        "DeclaredDemand": "0",
+        "DeclaredSupply": "60",
+        "EffectiveDemand": "0",
+        "EffectiveSupply": "60",
+        "Volume": "0",
+        "UnfilledDemand": "0",
+        "UnfilledSupply": "60",
+        "Production": "0",
+        "Consumption": "0",
+        "Food": "100",
+        "FoodCost": "5800",
+        "ResidentCash": "193900",
+        "CashDistribution": [
+          "9645",
+          "9645",
+          "9645",
+          "9645",
+          "9645",
+          "9645",
+          "9645",
+          "9645",
+          "9645",
+          "9645",
+          "9745",
+          "9745",
+          "9745",
+          "9745",
+          "9745",
+          "9745",
+          "9745",
+          "9745",
+          "9745",
+          "9745"
+        ],
+        "CompanyCash": "206100",
+        "CountryCash": "0",
+        "Wages": "0",
+        "FoodSpending": "0",
+        "Confiscation": "0",
+        "AttendanceDenominator": "0",
+        "Attendance": null,
+        "Hunger": "0",
+        "Deaths": "0",
+        "Stockouts": "0",
+        "StopReasons": [
+          "无新任务：参见企业决策输入、目标、工资预算及公开日程"
+        ]
+      }
+    },
+    {
+      "day": 5,
+      "alive": 20,
+      "health": 100,
+      "actions": {
+        "Rest": 80,
+        "Idle": 400
+      },
+      "cash": "211320",
+      "metrics": {
+        "Turn": "119",
+        "Version": "town-1",
+        "Price": null,
+        "ReferencePrice": "90",
+        "DeclaredDemand": "0",
+        "DeclaredSupply": "0",
+        "EffectiveDemand": "0",
+        "EffectiveSupply": "0",
+        "Volume": "0",
+        "UnfilledDemand": "0",
+        "UnfilledSupply": "0",
+        "Production": "0",
+        "Consumption": "0",
+        "Food": "100",
+        "FoodCost": "8020",
+        "ResidentCash": "188680",
+        "CashDistribution": [
+          "9384",
+          "9384",
+          "9384",
+          "9384",
+          "9384",
+          "9384",
+          "9384",
+          "9384",
+          "9384",
+          "9384",
+          "9484",
+          "9484",
+          "9484",
+          "9484",
+          "9484",
+          "9484",
+          "9484",
+          "9484",
+          "9484",
+          "9484"
+        ],
+        "CompanyCash": "211320",
+        "CountryCash": "0",
+        "Wages": "0",
+        "FoodSpending": "0",
+        "Confiscation": "0",
+        "AttendanceDenominator": "0",
+        "Attendance": null,
+        "Hunger": "0",
+        "Deaths": "0",
+        "Stockouts": "0",
+        "StopReasons": []
+      }
+    },
+    {
+      "day": 6,
+      "alive": 20,
+      "health": 100,
+      "actions": {
+        "Labor": 30,
+        "Idle": 370,
+        "Eat": 20,
+        "Rest": 60
+      },
+      "cash": "213420",
+      "metrics": {
+        "Turn": "143",
+        "Version": "town-1",
+        "Price": null,
+        "ReferencePrice": "89",
+        "DeclaredDemand": "0",
+        "DeclaredSupply": "0",
+        "EffectiveDemand": "0",
+        "EffectiveSupply": "0",
+        "Volume": "0",
+        "UnfilledDemand": "0",
+        "UnfilledSupply": "0",
+        "Production": "0",
+        "Consumption": "0",
+        "Food": "100",
+        "FoodCost": "7840",
+        "ResidentCash": "186580",
+        "CashDistribution": [
+          "9229",
+          "9229",
+          "9329",
+          "9329",
+          "9329",
+          "9329",
+          "9329",
+          "9329",
+          "9329",
+          "9329",
+          "9329",
+          "9329",
+          "9329",
+          "9329",
+          "9329",
+          "9329",
+          "9329",
+          "9329",
+          "9429",
+          "9429"
+        ],
+        "CompanyCash": "213420",
+        "CountryCash": "0",
+        "Wages": "0",
+        "FoodSpending": "0",
+        "Confiscation": "0",
+        "AttendanceDenominator": "0",
+        "Attendance": null,
+        "Hunger": "0",
+        "Deaths": "0",
+        "Stockouts": "0",
+        "StopReasons": []
+      }
+    },
+    {
+      "day": 7,
+      "alive": 20,
+      "health": 100,
+      "actions": {
+        "Labor": 30,
+        "Idle": 330,
+        "Rest": 100,
+        "Eat": 20
+      },
+      "cash": "215460",
+      "metrics": {
+        "Turn": "167",
+        "Version": "town-1",
+        "Price": null,
+        "ReferencePrice": "88",
+        "DeclaredDemand": "0",
+        "DeclaredSupply": "0",
+        "EffectiveDemand": "0",
+        "EffectiveSupply": "0",
+        "Volume": "0",
+        "UnfilledDemand": "0",
+        "UnfilledSupply": "0",
+        "Production": "0",
+        "Consumption": "0",
+        "Food": "100",
+        "FoodCost": "7740",
+        "ResidentCash": "184540",
+        "CashDistribution": [
+          "9177",
+          "9177",
+          "9177",
+          "9177",
+          "9177",
+          "9177",
+          "9177",
+          "9177",
+          "9177",
+          "9177",
+          "9277",
+          "9277",
+          "9277",
+          "9277",
+          "9277",
+          "9277",
+          "9277",
+          "9277",
+          "9277",
+          "9277"
+        ],
+        "CompanyCash": "215460",
+        "CountryCash": "0",
+        "Wages": "0",
+        "FoodSpending": "0",
+        "Confiscation": "0",
+        "AttendanceDenominator": "0",
+        "Attendance": null,
+        "Hunger": "0",
+        "Deaths": "0",
+        "Stockouts": "0",
+        "StopReasons": []
+      }
+    },
+    {
+      "day": 8,
+      "alive": 20,
+      "health": 100,
+      "actions": {
+        "Labor": 30,
+        "Idle": 370,
+        "Rest": 60,
+        "Eat": 20
+      },
+      "cash": "217440",
+      "metrics": {
+        "Turn": "191",
+        "Version": "town-1",
+        "Price": null,
+        "ReferencePrice": "87",
+        "DeclaredDemand": "0",
+        "DeclaredSupply": "0",
+        "EffectiveDemand": "0",
+        "EffectiveSupply": "0",
+        "Volume": "0",
+        "UnfilledDemand": "0",
+        "UnfilledSupply": "0",
+        "Production": "0",
+        "Consumption": "0",
+        "Food": "100",
+        "FoodCost": "7660",
+        "ResidentCash": "182560",
+        "CashDistribution": [
+          "9028",
+          "9028",
+          "9028",
+          "9028",
+          "9128",
+          "9128",
+          "9128",
+          "9128",
+          "9128",
+          "9128",
+          "9128",
+          "9128",
+          "9128",
+          "9128",
+          "9128",
+          "9128",
+          "9228",
+          "9228",
+          "9228",
+          "9228"
+        ],
+        "CompanyCash": "217440",
+        "CountryCash": "0",
+        "Wages": "0",
+        "FoodSpending": "0",
+        "Confiscation": "0",
+        "AttendanceDenominator": "0",
+        "Attendance": null,
+        "Hunger": "0",
+        "Deaths": "0",
+        "Stockouts": "0",
+        "StopReasons": []
+      }
+    },
+    {
+      "day": 9,
+      "alive": 20,
+      "health": 100,
+      "actions": {
+        "Labor": 30,
+        "Idle": 390,
+        "Rest": 60
+      },
+      "cash": "214440",
+      "metrics": {
+        "Turn": "215",
+        "Version": "town-1",
+        "Price": null,
+        "ReferencePrice": "87",
+        "DeclaredDemand": "0",
+        "DeclaredSupply": "60",
+        "EffectiveDemand": "0",
+        "EffectiveSupply": "60",
+        "Volume": "0",
+        "UnfilledDemand": "0",
+        "UnfilledSupply": "60",
+        "Production": "0",
+        "Consumption": "0",
+        "Food": "160",
+        "FoodCost": "10660",
+        "ResidentCash": "185560",
+        "CashDistribution": [
+          "9128",
+          "9128",
+          "9228",
+          "9228",
+          "9228",
+          "9228",
+          "9228",
+          "9228",
+          "9228",
+          "9228",
+          "9328",
+          "9328",
+          "9328",
+          "9328",
+          "9328",
+          "9328",
+          "9328",
+          "9328",
+          "9428",
+          "9428"
+        ],
+        "CompanyCash": "214440",
+        "CountryCash": "0",
+        "Wages": "0",
+        "FoodSpending": "0",
+        "Confiscation": "0",
+        "AttendanceDenominator": "0",
+        "Attendance": null,
+        "Hunger": "0",
+        "Deaths": "0",
+        "Stockouts": "0",
+        "StopReasons": [
+          "无新任务：参见企业决策输入、目标、工资预算及公开日程"
+        ]
+      }
+    },
+    {
+      "day": 10,
+      "alive": 20,
+      "health": 100,
+      "actions": {
+        "Eat": 20,
+        "Idle": 340,
+        "Rest": 120
+      },
+      "cash": "219360",
+      "metrics": {
+        "Turn": "239",
+        "Version": "town-1",
+        "Price": null,
+        "ReferencePrice": "86",
+        "DeclaredDemand": "0",
+        "DeclaredSupply": "0",
+        "EffectiveDemand": "0",
+        "EffectiveSupply": "0",
+        "Volume": "0",
+        "UnfilledDemand": "0",
+        "UnfilledSupply": "0",
+        "Production": "0",
+        "Consumption": "0",
+        "Food": "100",
+        "FoodCost": "7580",
+        "ResidentCash": "180640",
+        "CashDistribution": [
+          "8882",
+          "8882",
+          "8982",
+          "8982",
+          "8982",
+          "8982",
+          "8982",
+          "8982",
+          "8982",
+          "8982",
+          "9082",
+          "9082",
+          "9082",
+          "9082",
+          "9082",
+          "9082",
+          "9082",
+          "9082",
+          "9182",
+          "9182"
+        ],
+        "CompanyCash": "219360",
+        "CountryCash": "0",
+        "Wages": "0",
+        "FoodSpending": "0",
+        "Confiscation": "0",
+        "AttendanceDenominator": "0",
+        "Attendance": null,
+        "Hunger": "0",
+        "Deaths": "0",
+        "Stockouts": "0",
+        "StopReasons": []
+      }
+    },
+    {
+      "day": 11,
+      "alive": 20,
+      "health": 100,
+      "actions": {
+        "Labor": 30,
+        "Idle": 370,
+        "Eat": 20,
+        "Rest": 60
+      },
+      "cash": "221220",
+      "metrics": {
+        "Turn": "263",
+        "Version": "town-1",
+        "Price": null,
+        "ReferencePrice": "85",
+        "DeclaredDemand": "0",
+        "DeclaredSupply": "0",
+        "EffectiveDemand": "0",
+        "EffectiveSupply": "0",
+        "Volume": "0",
+        "UnfilledDemand": "0",
+        "UnfilledSupply": "0",
+        "Production": "0",
+        "Consumption": "0",
+        "Food": "100",
+        "FoodCost": "7500",
+        "ResidentCash": "178780",
+        "CashDistribution": [
+          "8839",
+          "8839",
+          "8839",
+          "8839",
+          "8839",
+          "8839",
+          "8939",
+          "8939",
+          "8939",
+          "8939",
+          "8939",
+          "8939",
+          "8939",
+          "8939",
+          "9039",
+          "9039",
+          "9039",
+          "9039",
+          "9039",
+          "9039"
+        ],
+        "CompanyCash": "221220",
+        "CountryCash": "0",
+        "Wages": "0",
+        "FoodSpending": "0",
+        "Confiscation": "0",
+        "AttendanceDenominator": "0",
+        "Attendance": null,
+        "Hunger": "0",
+        "Deaths": "0",
+        "Stockouts": "0",
+        "StopReasons": []
+      }
+    },
+    {
+      "day": 12,
+      "alive": 20,
+      "health": 100,
+      "actions": {
+        "Labor": 30,
+        "Idle": 370,
+        "Rest": 60,
+        "Eat": 20
+      },
+      "cash": "223020",
+      "metrics": {
+        "Turn": "287",
+        "Version": "town-1",
+        "Price": null,
+        "ReferencePrice": "85",
+        "DeclaredDemand": "0",
+        "DeclaredSupply": "0",
+        "EffectiveDemand": "0",
+        "EffectiveSupply": "0",
+        "Volume": "0",
+        "UnfilledDemand": "0",
+        "UnfilledSupply": "0",
+        "Production": "0",
+        "Consumption": "0",
+        "Food": "100",
+        "FoodCost": "7420",
+        "ResidentCash": "176980",
+        "CashDistribution": [
+          "8699",
+          "8699",
+          "8699",
+          "8699",
+          "8799",
+          "8799",
+          "8799",
+          "8799",
+          "8799",
+          "8799",
+          "8899",
+          "8899",
+          "8899",
+          "8899",
+          "8899",
+          "8899",
+          "8999",
+          "8999",
+          "8999",
+          "8999"
+        ],
+        "CompanyCash": "223020",
+        "CountryCash": "0",
+        "Wages": "0",
+        "FoodSpending": "0",
+        "Confiscation": "0",
+        "AttendanceDenominator": "0",
+        "Attendance": null,
+        "Hunger": "0",
+        "Deaths": "0",
+        "Stockouts": "0",
+        "StopReasons": []
+      }
+    },
+    {
+      "day": 13,
+      "alive": 20,
+      "health": 100,
+      "actions": {
+        "Labor": 30,
+        "Idle": 350,
+        "Rest": 80,
+        "Eat": 20
+      },
+      "cash": "224820",
+      "metrics": {
+        "Turn": "311",
+        "Version": "town-1",
+        "Price": null,
+        "ReferencePrice": "84",
+        "DeclaredDemand": "0",
+        "DeclaredSupply": "0",
+        "EffectiveDemand": "0",
+        "EffectiveSupply": "0",
+        "Volume": "0",
+        "UnfilledDemand": "0",
+        "UnfilledSupply": "0",
+        "Production": "0",
+        "Consumption": "0",
+        "Food": "100",
+        "FoodCost": "7400",
+        "ResidentCash": "175180",
+        "CashDistribution": [
+          "8559",
+          "8559",
+          "8559",
+          "8559",
+          "8759",
+          "8759",
+          "8759",
+          "8759",
+          "8759",
+          "8759",
+          "8759",
+          "8759",
+          "8759",
+          "8759",
+          "8759",
+          "8759",
+          "8959",
+          "8959",
+          "8959",
+          "8959"
+        ],
+        "CompanyCash": "224820",
+        "CountryCash": "0",
+        "Wages": "0",
+        "FoodSpending": "0",
+        "Confiscation": "0",
+        "AttendanceDenominator": "0",
+        "Attendance": null,
+        "Hunger": "0",
+        "Deaths": "0",
+        "Stockouts": "0",
+        "StopReasons": []
+      }
+    },
+    {
+      "day": 14,
+      "alive": 20,
+      "health": 100,
+      "actions": {
+        "Labor": 30,
+        "Rest": 120,
+        "Idle": 330
+      },
+      "cash": "221820",
+      "metrics": {
+        "Turn": "335",
+        "Version": "town-1",
+        "Price": null,
+        "ReferencePrice": "84",
+        "DeclaredDemand": "0",
+        "DeclaredSupply": "60",
+        "EffectiveDemand": "0",
+        "EffectiveSupply": "60",
+        "Volume": "0",
+        "UnfilledDemand": "0",
+        "UnfilledSupply": "60",
+        "Production": "0",
+        "Consumption": "0",
+        "Food": "160",
+        "FoodCost": "10400",
+        "ResidentCash": "178180",
+        "CashDistribution": [
+          "8659",
+          "8659",
+          "8759",
+          "8759",
+          "8859",
+          "8859",
+          "8859",
+          "8859",
+          "8859",
+          "8859",
+          "8959",
+          "8959",
+          "8959",
+          "8959",
+          "8959",
+          "8959",
+          "9059",
+          "9059",
+          "9159",
+          "9159"
+        ],
+        "CompanyCash": "221820",
+        "CountryCash": "0",
+        "Wages": "0",
+        "FoodSpending": "0",
+        "Confiscation": "0",
+        "AttendanceDenominator": "0",
+        "Attendance": null,
+        "Hunger": "0",
+        "Deaths": "0",
+        "Stockouts": "0",
+        "StopReasons": [
+          "无新任务：参见企业决策输入、目标、工资预算及公开日程"
+        ]
+      }
+    },
+    {
+      "day": 15,
+      "alive": 20,
+      "health": 100,
+      "actions": {
+        "Idle": 400,
+        "Eat": 20,
+        "Rest": 60
+      },
+      "cash": "226560",
+      "metrics": {
+        "Turn": "359",
+        "Version": "town-1",
+        "Price": null,
+        "ReferencePrice": "84",
+        "DeclaredDemand": "0",
+        "DeclaredSupply": "0",
+        "EffectiveDemand": "0",
+        "EffectiveSupply": "0",
+        "Volume": "0",
+        "UnfilledDemand": "0",
+        "UnfilledSupply": "0",
+        "Production": "0",
+        "Consumption": "0",
+        "Food": "100",
+        "FoodCost": "7340",
+        "ResidentCash": "173440",
+        "CashDistribution": [
+          "8422",
+          "8422",
+          "8522",
+          "8522",
+          "8622",
+          "8622",
+          "8622",
+          "8622",
+          "8622",
+          "8622",
+          "8722",
+          "8722",
+          "8722",
+          "8722",
+          "8722",
+          "8722",
+          "8822",
+          "8822",
+          "8922",
+          "8922"
+        ],
+        "CompanyCash": "226560",
+        "CountryCash": "0",
+        "Wages": "0",
+        "FoodSpending": "0",
+        "Confiscation": "0",
+        "AttendanceDenominator": "0",
+        "Attendance": null,
+        "Hunger": "0",
+        "Deaths": "0",
+        "Stockouts": "0",
+        "StopReasons": []
+      }
+    },
+    {
+      "day": 16,
+      "alive": 20,
+      "health": 100,
+      "actions": {
+        "Labor": 30,
+        "Idle": 370,
+        "Rest": 60,
+        "Eat": 20
+      },
+      "cash": "228300",
+      "metrics": {
+        "Turn": "383",
+        "Version": "town-1",
+        "Price": null,
+        "ReferencePrice": "83",
+        "DeclaredDemand": "0",
+        "DeclaredSupply": "0",
+        "EffectiveDemand": "0",
+        "EffectiveSupply": "0",
+        "Volume": "0",
+        "UnfilledDemand": "0",
+        "UnfilledSupply": "0",
+        "Production": "0",
+        "Consumption": "0",
+        "Food": "100",
+        "FoodCost": "7320",
+        "ResidentCash": "171700",
+        "CashDistribution": [
+          "8385",
+          "8385",
+          "8385",
+          "8385",
+          "8485",
+          "8485",
+          "8585",
+          "8585",
+          "8585",
+          "8585",
+          "8585",
+          "8585",
+          "8585",
+          "8585",
+          "8685",
+          "8685",
+          "8785",
+          "8785",
+          "8785",
+          "8785"
+        ],
+        "CompanyCash": "228300",
+        "CountryCash": "0",
+        "Wages": "0",
+        "FoodSpending": "0",
+        "Confiscation": "0",
+        "AttendanceDenominator": "0",
+        "Attendance": null,
+        "Hunger": "0",
+        "Deaths": "0",
+        "Stockouts": "0",
+        "StopReasons": []
+      }
+    },
+    {
+      "day": 17,
+      "alive": 20,
+      "health": 100,
+      "actions": {
+        "Labor": 30,
+        "Idle": 310,
+        "Rest": 120,
+        "Eat": 20
+      },
+      "cash": "229980",
+      "metrics": {
+        "Turn": "407",
+        "Version": "town-1",
+        "Price": null,
+        "ReferencePrice": "83",
+        "DeclaredDemand": "0",
+        "DeclaredSupply": "0",
+        "EffectiveDemand": "0",
+        "EffectiveSupply": "0",
+        "Volume": "0",
+        "UnfilledDemand": "0",
+        "UnfilledSupply": "0",
+        "Production": "0",
+        "Consumption": "0",
+        "Food": "100",
+        "FoodCost": "7260",
+        "ResidentCash": "170020",
+        "CashDistribution": [
+          "8251",
+          "8251",
+          "8251",
+          "8251",
+          "8451",
+          "8451",
+          "8451",
+          "8451",
+          "8451",
+          "8451",
+          "8551",
+          "8551",
+          "8551",
+          "8551",
+          "8551",
+          "8551",
+          "8751",
+          "8751",
+          "8751",
+          "8751"
+        ],
+        "CompanyCash": "229980",
+        "CountryCash": "0",
+        "Wages": "0",
+        "FoodSpending": "0",
+        "Confiscation": "0",
+        "AttendanceDenominator": "0",
+        "Attendance": null,
+        "Hunger": "0",
+        "Deaths": "0",
+        "Stockouts": "0",
+        "StopReasons": []
+      }
+    },
+    {
+      "day": 18,
+      "alive": 20,
+      "health": 100,
+      "actions": {
+        "Labor": 30,
+        "Idle": 390,
+        "Rest": 60
+      },
+      "cash": "226980",
+      "metrics": {
+        "Turn": "431",
+        "Version": "town-1",
+        "Price": null,
+        "ReferencePrice": "83",
+        "DeclaredDemand": "0",
+        "DeclaredSupply": "60",
+        "EffectiveDemand": "0",
+        "EffectiveSupply": "60",
+        "Volume": "0",
+        "UnfilledDemand": "0",
+        "UnfilledSupply": "60",
+        "Production": "0",
+        "Consumption": "0",
+        "Food": "160",
+        "FoodCost": "10260",
+        "ResidentCash": "173020",
+        "CashDistribution": [
+          "8351",
+          "8351",
+          "8351",
+          "8351",
+          "8651",
+          "8651",
+          "8651",
+          "8651",
+          "8651",
+          "8651",
+          "8651",
+          "8651",
+          "8651",
+          "8651",
+          "8651",
+          "8651",
+          "8951",
+          "8951",
+          "8951",
+          "8951"
+        ],
+        "CompanyCash": "226980",
+        "CountryCash": "0",
+        "Wages": "0",
+        "FoodSpending": "0",
+        "Confiscation": "0",
+        "AttendanceDenominator": "0",
+        "Attendance": null,
+        "Hunger": "0",
+        "Deaths": "0",
+        "Stockouts": "0",
+        "StopReasons": [
+          "无新任务：参见企业决策输入、目标、工资预算及公开日程"
+        ]
+      }
+    },
+    {
+      "day": 19,
+      "alive": 20,
+      "health": 100,
+      "actions": {
+        "Idle": 400,
+        "Eat": 20,
+        "Rest": 60
+      },
+      "cash": "231660",
+      "metrics": {
+        "Turn": "455",
+        "Version": "town-1",
+        "Price": null,
+        "ReferencePrice": "82",
+        "DeclaredDemand": "0",
+        "DeclaredSupply": "0",
+        "EffectiveDemand": "0",
+        "EffectiveSupply": "0",
+        "Volume": "0",
+        "UnfilledDemand": "0",
+        "UnfilledSupply": "0",
+        "Production": "0",
+        "Consumption": "0",
+        "Food": "100",
+        "FoodCost": "7240",
+        "ResidentCash": "168340",
+        "CashDistribution": [
+          "8117",
+          "8117",
+          "8117",
+          "8117",
+          "8417",
+          "8417",
+          "8417",
+          "8417",
+          "8417",
+          "8417",
+          "8417",
+          "8417",
+          "8417",
+          "8417",
+          "8417",
+          "8417",
+          "8717",
+          "8717",
+          "8717",
+          "8717"
+        ],
+        "CompanyCash": "231660",
+        "CountryCash": "0",
+        "Wages": "0",
+        "FoodSpending": "0",
+        "Confiscation": "0",
+        "AttendanceDenominator": "0",
+        "Attendance": null,
+        "Hunger": "0",
+        "Deaths": "0",
+        "Stockouts": "0",
+        "StopReasons": []
+      }
+    },
+    {
+      "day": 20,
+      "alive": 20,
+      "health": 100,
+      "actions": {
+        "Labor": 30,
+        "Rest": 120,
+        "Idle": 310,
+        "Eat": 20
+      },
+      "cash": "233280",
+      "metrics": {
+        "Turn": "479",
+        "Version": "town-1",
+        "Price": null,
+        "ReferencePrice": "82",
+        "DeclaredDemand": "0",
+        "DeclaredSupply": "0",
+        "EffectiveDemand": "0",
+        "EffectiveSupply": "0",
+        "Volume": "0",
+        "UnfilledDemand": "0",
+        "UnfilledSupply": "0",
+        "Production": "0",
+        "Consumption": "0",
+        "Food": "100",
+        "FoodCost": "7180",
+        "ResidentCash": "166720",
+        "CashDistribution": [
+          "8086",
+          "8086",
+          "8086",
+          "8086",
+          "8286",
+          "8286",
+          "8286",
+          "8286",
+          "8286",
+          "8286",
+          "8386",
+          "8386",
+          "8386",
+          "8386",
+          "8386",
+          "8386",
+          "8586",
+          "8586",
+          "8586",
+          "8586"
+        ],
+        "CompanyCash": "233280",
+        "CountryCash": "0",
+        "Wages": "0",
+        "FoodSpending": "0",
+        "Confiscation": "0",
+        "AttendanceDenominator": "0",
+        "Attendance": null,
+        "Hunger": "0",
+        "Deaths": "0",
+        "Stockouts": "0",
+        "StopReasons": []
+      }
+    },
+    {
+      "day": 21,
+      "alive": 20,
+      "health": 100,
+      "actions": {
+        "Labor": 30,
+        "Idle": 350,
+        "Rest": 80,
+        "Eat": 20
+      },
+      "cash": "234900",
+      "metrics": {
+        "Turn": "503",
+        "Version": "town-1",
+        "Price": null,
+        "ReferencePrice": "82",
+        "DeclaredDemand": "0",
+        "DeclaredSupply": "0",
+        "EffectiveDemand": "0",
+        "EffectiveSupply": "0",
+        "Volume": "0",
+        "UnfilledDemand": "0",
+        "UnfilledSupply": "0",
+        "Production": "0",
+        "Consumption": "0",
+        "Food": "100",
+        "FoodCost": "7160",
+        "ResidentCash": "165100",
+        "CashDistribution": [
+          "7955",
+          "7955",
+          "8055",
+          "8055",
+          "8155",
+          "8155",
+          "8155",
+          "8155",
+          "8255",
+          "8255",
+          "8255",
+          "8255",
+          "8355",
+          "8355",
+          "8355",
+          "8355",
+          "8455",
+          "8455",
+          "8555",
+          "8555"
+        ],
+        "CompanyCash": "234900",
+        "CountryCash": "0",
+        "Wages": "0",
+        "FoodSpending": "0",
+        "Confiscation": "0",
+        "AttendanceDenominator": "0",
+        "Attendance": null,
+        "Hunger": "0",
+        "Deaths": "0",
+        "Stockouts": "0",
+        "StopReasons": []
+      }
+    },
+    {
+      "day": 22,
+      "alive": 20,
+      "health": 100,
+      "actions": {
+        "Labor": 30,
+        "Idle": 370,
+        "Rest": 60,
+        "Eat": 20
+      },
+      "cash": "236520",
+      "metrics": {
+        "Turn": "527",
+        "Version": "town-1",
+        "Price": "77",
+        "ReferencePrice": "81",
+        "DeclaredDemand": "60",
+        "DeclaredSupply": "60",
+        "EffectiveDemand": "60",
+        "EffectiveSupply": "60",
+        "Volume": "60",
+        "UnfilledDemand": "0",
+        "UnfilledSupply": "0",
+        "Production": "0",
+        "Consumption": "0",
+        "Food": "100",
+        "FoodCost": "7160",
+        "ResidentCash": "163480",
+        "CashDistribution": [
+          "7824",
+          "7824",
+          "7924",
+          "7924",
+          "8024",
+          "8024",
+          "8124",
+          "8124",
+          "8124",
+          "8124",
+          "8224",
+          "8224",
+          "8224",
+          "8224",
+          "8324",
+          "8324",
+          "8424",
+          "8424",
+          "8524",
+          "8524"
+        ],
+        "CompanyCash": "236520",
+        "CountryCash": "0",
+        "Wages": "0",
+        "FoodSpending": "4620",
+        "Confiscation": "0",
+        "AttendanceDenominator": "0",
+        "Attendance": null,
+        "Hunger": "0",
+        "Deaths": "0",
+        "Stockouts": "0",
+        "StopReasons": [
+          "无新任务：参见企业决策输入、目标、工资预算及公开日程"
+        ]
+      }
+    },
+    {
+      "day": 23,
+      "alive": 20,
+      "health": 100,
+      "actions": {
+        "Idle": 390,
+        "Labor": 30,
+        "Rest": 60
+      },
+      "cash": "233520",
+      "metrics": {
+        "Turn": "551",
+        "Version": "town-1",
+        "Price": null,
+        "ReferencePrice": "81",
+        "DeclaredDemand": "0",
+        "DeclaredSupply": "60",
+        "EffectiveDemand": "0",
+        "EffectiveSupply": "60",
+        "Volume": "0",
+        "UnfilledDemand": "0",
+        "UnfilledSupply": "60",
+        "Production": "0",
+        "Consumption": "0",
+        "Food": "160",
+        "FoodCost": "10160",
+        "ResidentCash": "166480",
+        "CashDistribution": [
+          "7924",
+          "8024",
+          "8024",
+          "8024",
+          "8224",
+          "8224",
+          "8324",
+          "8324",
+          "8324",
+          "8324",
+          "8324",
+          "8324",
+          "8324",
+          "8324",
+          "8424",
+          "8424",
+          "8624",
+          "8624",
+          "8624",
+          "8724"
+        ],
+        "CompanyCash": "233520",
+        "CountryCash": "0",
+        "Wages": "0",
+        "FoodSpending": "0",
+        "Confiscation": "0",
+        "AttendanceDenominator": "0",
+        "Attendance": null,
+        "Hunger": "0",
+        "Deaths": "0",
+        "Stockouts": "0",
+        "StopReasons": [
+          "无新任务：参见企业决策输入、目标、工资预算及公开日程"
+        ]
+      }
+    },
+    {
+      "day": 24,
+      "alive": 20,
+      "health": 100,
+      "actions": {
+        "Idle": 340,
+        "Rest": 120,
+        "Eat": 20
+      },
+      "cash": "238080",
+      "metrics": {
+        "Turn": "575",
+        "Version": "town-1",
+        "Price": null,
+        "ReferencePrice": "81",
+        "DeclaredDemand": "0",
+        "DeclaredSupply": "0",
+        "EffectiveDemand": "0",
+        "EffectiveSupply": "0",
+        "Volume": "0",
+        "UnfilledDemand": "0",
+        "UnfilledSupply": "0",
+        "Production": "0",
+        "Consumption": "0",
+        "Food": "100",
+        "FoodCost": "7100",
+        "ResidentCash": "161920",
+        "CashDistribution": [
+          "7696",
+          "7796",
+          "7796",
+          "7796",
+          "7996",
+          "7996",
+          "8096",
+          "8096",
+          "8096",
+          "8096",
+          "8096",
+          "8096",
+          "8096",
+          "8096",
+          "8196",
+          "8196",
+          "8396",
+          "8396",
+          "8396",
+          "8496"
+        ],
+        "CompanyCash": "238080",
+        "CountryCash": "0",
+        "Wages": "0",
+        "FoodSpending": "0",
+        "Confiscation": "0",
+        "AttendanceDenominator": "0",
+        "Attendance": null,
+        "Hunger": "0",
+        "Deaths": "0",
+        "Stockouts": "0",
+        "StopReasons": []
+      }
+    },
+    {
+      "day": 25,
+      "alive": 20,
+      "health": 100,
+      "actions": {
+        "Labor": 30,
+        "Idle": 370,
+        "Eat": 20,
+        "Rest": 60
+      },
+      "cash": "239640",
+      "metrics": {
+        "Turn": "599",
+        "Version": "town-1",
+        "Price": null,
+        "ReferencePrice": "81",
+        "DeclaredDemand": "0",
+        "DeclaredSupply": "0",
+        "EffectiveDemand": "0",
+        "EffectiveSupply": "0",
+        "Volume": "0",
+        "UnfilledDemand": "0",
+        "UnfilledSupply": "0",
+        "Production": "0",
+        "Consumption": "0",
+        "Food": "100",
+        "FoodCost": "7080",
+        "ResidentCash": "160360",
+        "CashDistribution": [
+          "7668",
+          "7768",
+          "7768",
+          "7768",
+          "7868",
+          "7868",
+          "7968",
+          "7968",
+          "7968",
+          "7968",
+          "8068",
+          "8068",
+          "8068",
+          "8068",
+          "8168",
+          "8168",
+          "8268",
+          "8268",
+          "8268",
+          "8368"
+        ],
+        "CompanyCash": "239640",
+        "CountryCash": "0",
+        "Wages": "0",
+        "FoodSpending": "0",
+        "Confiscation": "0",
+        "AttendanceDenominator": "0",
+        "Attendance": null,
+        "Hunger": "0",
+        "Deaths": "0",
+        "Stockouts": "0",
+        "StopReasons": []
+      }
+    },
+    {
+      "day": 26,
+      "alive": 20,
+      "health": 100,
+      "actions": {
+        "Labor": 30,
+        "Idle": 370,
+        "Rest": 60,
+        "Eat": 20
+      },
+      "cash": "241200",
+      "metrics": {
+        "Turn": "623",
+        "Version": "town-1",
+        "Price": null,
+        "ReferencePrice": "81",
+        "DeclaredDemand": "0",
+        "DeclaredSupply": "0",
+        "EffectiveDemand": "0",
+        "EffectiveSupply": "0",
+        "Volume": "0",
+        "UnfilledDemand": "0",
+        "UnfilledSupply": "0",
+        "Production": "0",
+        "Consumption": "0",
+        "Food": "100",
+        "FoodCost": "7080",
+        "ResidentCash": "158800",
+        "CashDistribution": [
+          "7540",
+          "7640",
+          "7740",
+          "7740",
+          "7740",
+          "7740",
+          "7840",
+          "7840",
+          "7940",
+          "7940",
+          "7940",
+          "7940",
+          "8040",
+          "8040",
+          "8140",
+          "8140",
+          "8140",
+          "8140",
+          "8240",
+          "8340"
+        ],
+        "CompanyCash": "241200",
+        "CountryCash": "0",
+        "Wages": "0",
+        "FoodSpending": "0",
+        "Confiscation": "0",
+        "AttendanceDenominator": "0",
+        "Attendance": null,
+        "Hunger": "0",
+        "Deaths": "0",
+        "Stockouts": "0",
+        "StopReasons": []
+      }
+    },
+    {
+      "day": 27,
+      "alive": 20,
+      "health": 100,
+      "actions": {
+        "Labor": 30,
+        "Idle": 330,
+        "Rest": 120
+      },
+      "cash": "238200",
+      "metrics": {
+        "Turn": "647",
+        "Version": "town-1",
+        "Price": null,
+        "ReferencePrice": "81",
+        "DeclaredDemand": "0",
+        "DeclaredSupply": "60",
+        "EffectiveDemand": "0",
+        "EffectiveSupply": "60",
+        "Volume": "0",
+        "UnfilledDemand": "0",
+        "UnfilledSupply": "60",
+        "Production": "0",
+        "Consumption": "0",
+        "Food": "160",
+        "FoodCost": "10080",
+        "ResidentCash": "161800",
+        "CashDistribution": [
+          "7640",
+          "7740",
+          "7840",
+          "7840",
+          "7840",
+          "7840",
+          "8040",
+          "8040",
+          "8040",
+          "8040",
+          "8140",
+          "8140",
+          "8140",
+          "8140",
+          "8340",
+          "8340",
+          "8340",
+          "8340",
+          "8440",
+          "8540"
+        ],
+        "CompanyCash": "238200",
+        "CountryCash": "0",
+        "Wages": "0",
+        "FoodSpending": "0",
+        "Confiscation": "0",
+        "AttendanceDenominator": "0",
+        "Attendance": null,
+        "Hunger": "0",
+        "Deaths": "0",
+        "Stockouts": "0",
+        "StopReasons": [
+          "无新任务：参见企业决策输入、目标、工资预算及公开日程"
+        ]
+      }
+    },
+    {
+      "day": 28,
+      "alive": 20,
+      "health": 100,
+      "actions": {
+        "Idle": 400,
+        "Eat": 20,
+        "Rest": 60
+      },
+      "cash": "242760",
+      "metrics": {
+        "Turn": "671",
+        "Version": "town-1",
+        "Price": null,
+        "ReferencePrice": "80",
+        "DeclaredDemand": "0",
+        "DeclaredSupply": "0",
+        "EffectiveDemand": "0",
+        "EffectiveSupply": "0",
+        "Volume": "0",
+        "UnfilledDemand": "0",
+        "UnfilledSupply": "0",
+        "Production": "0",
+        "Consumption": "0",
+        "Food": "100",
+        "FoodCost": "7080",
+        "ResidentCash": "157240",
+        "CashDistribution": [
+          "7412",
+          "7512",
+          "7612",
+          "7612",
+          "7612",
+          "7612",
+          "7812",
+          "7812",
+          "7812",
+          "7812",
+          "7912",
+          "7912",
+          "7912",
+          "7912",
+          "8112",
+          "8112",
+          "8112",
+          "8112",
+          "8212",
+          "8312"
+        ],
+        "CompanyCash": "242760",
+        "CountryCash": "0",
+        "Wages": "0",
+        "FoodSpending": "0",
+        "Confiscation": "0",
+        "AttendanceDenominator": "0",
+        "Attendance": null,
+        "Hunger": "0",
+        "Deaths": "0",
+        "Stockouts": "0",
+        "StopReasons": []
+      }
+    },
+    {
+      "day": 29,
+      "alive": 20,
+      "health": 100,
+      "actions": {
+        "Labor": 30,
+        "Idle": 350,
+        "Rest": 80,
+        "Eat": 20
+      },
+      "cash": "244320",
+      "metrics": {
+        "Turn": "695",
+        "Version": "town-1",
+        "Price": null,
+        "ReferencePrice": "80",
+        "DeclaredDemand": "0",
+        "DeclaredSupply": "0",
+        "EffectiveDemand": "0",
+        "EffectiveSupply": "0",
+        "Volume": "0",
+        "UnfilledDemand": "0",
+        "UnfilledSupply": "0",
+        "Production": "0",
+        "Consumption": "0",
+        "Food": "100",
+        "FoodCost": "7080",
+        "ResidentCash": "155680",
+        "CashDistribution": [
+          "7384",
+          "7484",
+          "7484",
+          "7484",
+          "7584",
+          "7584",
+          "7684",
+          "7684",
+          "7784",
+          "7784",
+          "7784",
+          "7784",
+          "7884",
+          "7884",
+          "7984",
+          "7984",
+          "8084",
+          "8084",
+          "8084",
+          "8184"
+        ],
+        "CompanyCash": "244320",
+        "CountryCash": "0",
+        "Wages": "0",
+        "FoodSpending": "0",
+        "Confiscation": "0",
+        "AttendanceDenominator": "0",
+        "Attendance": null,
+        "Hunger": "0",
+        "Deaths": "0",
+        "Stockouts": "0",
+        "StopReasons": []
+      }
+    },
+    {
+      "day": 30,
+      "alive": 20,
+      "health": 100,
+      "actions": {
+        "Labor": 30,
+        "Idle": 370,
+        "Rest": 60,
+        "Eat": 20
+      },
+      "cash": "245880",
+      "metrics": {
+        "Turn": "719",
+        "Version": "town-1",
+        "Price": null,
+        "ReferencePrice": "80",
+        "DeclaredDemand": "0",
+        "DeclaredSupply": "0",
+        "EffectiveDemand": "0",
+        "EffectiveSupply": "0",
+        "Volume": "0",
+        "UnfilledDemand": "0",
+        "UnfilledSupply": "0",
+        "Production": "0",
+        "Consumption": "0",
+        "Food": "100",
+        "FoodCost": "7080",
+        "ResidentCash": "154120",
+        "CashDistribution": [
+          "7356",
+          "7456",
+          "7456",
+          "7456",
+          "7456",
+          "7456",
+          "7556",
+          "7556",
+          "7656",
+          "7656",
+          "7756",
+          "7756",
+          "7856",
+          "7856",
+          "7956",
+          "7956",
+          "7956",
+          "7956",
+          "7956",
+          "8056"
+        ],
+        "CompanyCash": "245880",
+        "CountryCash": "0",
+        "Wages": "0",
+        "FoodSpending": "0",
+        "Confiscation": "0",
+        "AttendanceDenominator": "0",
+        "Attendance": null,
+        "Hunger": "0",
+        "Deaths": "0",
+        "Stockouts": "0",
+        "StopReasons": []
+      }
+    }
+  ],
+  "personActions": {
+    "P00": {
+      "Labor": 29,
+      "Idle": 551,
+      "Rest": 117,
+      "Eat": 23
+    },
+    "P01": {
+      "Labor": 34,
+      "Idle": 546,
+      "Rest": 117,
+      "Eat": 23
+    },
+    "P02": {
+      "Labor": 34,
+      "Idle": 546,
+      "Rest": 117,
+      "Eat": 23
+    },
+    "P03": {
+      "Labor": 30,
+      "Idle": 550,
+      "Rest": 117,
+      "Eat": 23
+    },
+    "P04": {
+      "Labor": 30,
+      "Idle": 550,
+      "Rest": 117,
+      "Eat": 23
+    },
+    "P05": {
+      "Labor": 35,
+      "Idle": 545,
+      "Rest": 117,
+      "Eat": 23
+    },
+    "P06": {
+      "Labor": 35,
+      "Idle": 545,
+      "Rest": 117,
+      "Eat": 23
+    },
+    "P07": {
+      "Labor": 32,
+      "Idle": 548,
+      "Rest": 117,
+      "Eat": 23
+    },
+    "P08": {
+      "Labor": 32,
+      "Idle": 548,
+      "Rest": 117,
+      "Eat": 23
+    },
+    "P09": {
+      "Labor": 35,
+      "Idle": 545,
+      "Rest": 117,
+      "Eat": 23
+    },
+    "P10": {
+      "Labor": 36,
+      "Idle": 544,
+      "Rest": 117,
+      "Eat": 23
+    },
+    "P11": {
+      "Labor": 31,
+      "Idle": 549,
+      "Rest": 117,
+      "Eat": 23
+    },
+    "P12": {
+      "Labor": 31,
+      "Idle": 549,
+      "Rest": 117,
+      "Eat": 23
+    },
+    "P13": {
+      "Labor": 35,
+      "Idle": 545,
+      "Rest": 117,
+      "Eat": 23
+    },
+    "P14": {
+      "Labor": 35,
+      "Idle": 545,
+      "Rest": 117,
+      "Eat": 23
+    },
+    "P15": {
+      "Labor": 30,
+      "Idle": 550,
+      "Rest": 117,
+      "Eat": 23
+    },
+    "P16": {
+      "Labor": 30,
+      "Idle": 550,
+      "Rest": 117,
+      "Eat": 23
+    },
+    "P17": {
+      "Labor": 33,
+      "Idle": 547,
+      "Rest": 117,
+      "Eat": 23
+    },
+    "P18": {
+      "Labor": 33,
+      "Idle": 547,
+      "Rest": 117,
+      "Eat": 23
+    },
+    "P19": {
+      "Labor": 30,
+      "Idle": 550,
+      "Rest": 117,
+      "Eat": 23
+    }
+  },
+  "firstMetrics": {
+    "Turn": "0",
+    "Version": "town-1",
+    "Price": null,
+    "ReferencePrice": "100",
+    "DeclaredDemand": "0",
+    "DeclaredSupply": "80",
+    "EffectiveDemand": "0",
+    "EffectiveSupply": "80",
+    "Volume": "0",
+    "UnfilledDemand": "0",
+    "UnfilledSupply": "80",
+    "Production": "40",
+    "Consumption": "0",
+    "Food": "220",
+    "FoodCost": "20000",
+    "ResidentCash": "202000",
+    "CashDistribution": [
+      "10100",
+      "10100",
+      "10100",
+      "10100",
+      "10100",
+      "10100",
+      "10100",
+      "10100",
+      "10100",
+      "10100",
+      "10100",
+      "10100",
+      "10100",
+      "10100",
+      "10100",
+      "10100",
+      "10100",
+      "10100",
+      "10100",
+      "10100"
+    ],
+    "CompanyCash": "198000",
+    "CountryCash": "0",
+    "Wages": "2000",
+    "FoodSpending": "0",
+    "Confiscation": "0",
+    "AttendanceDenominator": "20",
+    "Attendance": "1",
+    "Hunger": "0",
+    "Deaths": "0",
+    "Stockouts": "0",
+    "StopReasons": [
+      "无新任务：参见企业决策输入、目标、工资预算及公开日程"
+    ]
+  },
+  "lastMetrics": {
+    "Turn": "719",
+    "Version": "town-1",
+    "Price": null,
+    "ReferencePrice": "80",
+    "DeclaredDemand": "0",
+    "DeclaredSupply": "0",
+    "EffectiveDemand": "0",
+    "EffectiveSupply": "0",
+    "Volume": "0",
+    "UnfilledDemand": "0",
+    "UnfilledSupply": "0",
+    "Production": "0",
+    "Consumption": "0",
+    "Food": "100",
+    "FoodCost": "7080",
+    "ResidentCash": "154120",
+    "CashDistribution": [
+      "7356",
+      "7456",
+      "7456",
+      "7456",
+      "7456",
+      "7456",
+      "7556",
+      "7556",
+      "7656",
+      "7656",
+      "7756",
+      "7756",
+      "7856",
+      "7856",
+      "7956",
+      "7956",
+      "7956",
+      "7956",
+      "7956",
+      "8056"
+    ],
+    "CompanyCash": "245880",
+    "CountryCash": "0",
+    "Wages": "0",
+    "FoodSpending": "0",
+    "Confiscation": "0",
+    "AttendanceDenominator": "0",
+    "Attendance": null,
+    "Hunger": "0",
+    "Deaths": "0",
+    "Stockouts": "0",
+    "StopReasons": []
+  }
+}

@@ -15,6 +15,7 @@ public sealed record PersonStatus(string Person, string Kind, long FirstTurn, lo
 public sealed record StateFact(long Turn, int Stage, string Subject, string Kind, string Input, string Output);
 public sealed record ObserverSnapshot(long Turn, IReadOnlyList<Entity> Entities, IReadOnlyList<Lot> Lots, IReadOnlyDictionary<string,BalanceSheet> Accounts, IReadOnlyList<Market> Markets, IReadOnlyList<WorkTask> Tasks)
 {
+    public IReadOnlyList<ItemType> ItemTypes { get; init; } = [];
     public WorldPresentation? Presentation { get; init; }
     public IReadOnlyList<TransportProgress> Transport { get; init; } = [];
     public EnvironmentConfiguration? Environment { get; init; }
@@ -47,7 +48,7 @@ public sealed partial class World
     {
         lock(gate) return new(Turn,Array.AsReadOnly(People.Values.ToArray()),Lots,
             scenario.Entities.ToDictionary(e => e.Id,e => Report(e.Id)).AsReadOnly(),Array.AsReadOnly((currentMarkets ?? scenario.Markets).ToArray()),
-            Array.AsReadOnly(scenario.Tasks.Concat(publishedTasks).Where(t => (t.EffectiveTurn==Turn || productionProgress.Values.Any(p => p.Task==t.Id && p.State=="running")) && People[t.Employee].Health>0).ToArray())) { Production=ProductionProgress, Jobs=Employees, Transport=transport.Values.ToArray(), Presentation=WorldPresentation.Create(scenario), Environment=currentEnvironment??scenario.Environment, Regions=scenario.Regions };
+            Array.AsReadOnly(scenario.Tasks.Concat(publishedTasks).Where(t => (t.EffectiveTurn==Turn || productionProgress.Values.Any(p => p.Task==t.Id && p.State=="running")) && People[t.Employee].Health>0).ToArray())) { Production=ProductionProgress, Jobs=Employees, Transport=transport.Values.ToArray(), ItemTypes=scenario.ItemTypes, Presentation=WorldPresentation.Create(scenario), Environment=currentEnvironment??scenario.Environment, Regions=scenario.Regions };
     }
     public DecisionView View(string entity)
     {

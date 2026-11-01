@@ -1,0 +1,15 @@
+{
+  "Id": "fd2570c35cfb413bb9d6b16742b1e881",
+  "Start": {
+    "Name": "河湾镇",
+    "Description": "沿着河流，见证一个小镇的日常。每一份食物、每一次劳动，都有它的来处。",
+    "Variant": "town",
+    "Policy": {
+      "Schema": "mongo-1",
+      "StorageBytes": "4294967296",
+      "InflightBytes": "67108864",
+      "ProcessBytes": "2147483648",
+      "PageSize": "20"
+    }
+  }
+}

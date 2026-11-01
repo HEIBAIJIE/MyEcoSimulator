@@ -21,6 +21,8 @@
 | 决策规则 | [基准策略](decision-rules/02_baseline_strategy.md) | 基准个人与企业策略 |
 | 决策规则 | [受约束生产策略](decision-rules/03_production_strategy.md) | procurement-1 独立扩展策略 |
 | 决策规则 | [多企业策略](decision-rules/04_organization_strategy.md) | organizations-1 授权与任务轮换实例 |
+| 决策规则 | [小镇生活策略](decision-rules/05_town_life_strategy.md) | town-life-1，F12待实施 |
+| 内容配置 | [小镇生活开局](content-config/04_town_life.md) | town-2，F12待实施 |
 | 内容配置 | [场景变体与指标](content-config/03_variants_metrics.md) | 场景变体与指标 |
 | 内容配置 | [配置规范](content-config/01_configuration.md) | 配置规范与最小场景 |
 | 内容配置 | [基准初始条件](content-config/02_baseline.md) | 基准初始条件 baseline-1 |
