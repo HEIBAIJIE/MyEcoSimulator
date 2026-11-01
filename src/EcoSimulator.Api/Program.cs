@@ -1,4 +1,4 @@
-﻿using EcoSimulator.Core;
+using EcoSimulator.Core;
 var builder=WebApplication.CreateBuilder(args);
 var connection=builder.Configuration["Mongo:Connection"]??throw new InvalidOperationException("必须配置Mongo:Connection");
 var database=builder.Configuration["Mongo:Database"]??throw new InvalidOperationException("必须配置Mongo:Database");
@@ -12,6 +12,7 @@ app.UseDefaultFiles();
 app.UseStaticFiles();
 app.Use(async (context,next)=> { try { await next(context); } catch(Exception e) when(e is RuleException or System.Text.Json.JsonException) { context.Response.StatusCode=400; await context.Response.WriteAsJsonAsync(new {error=e.Message}); } });
 IResult Json(string value)=>Results.Text(value,"application/json");
+app.MapGet("/game/start",()=>Json(Wire.Write(new { Name="河湾镇", Description="沿着河流，见证一个小镇的日常。每一份食物、每一次劳动，都有它的来处。", Variant="town", Policy=new PersistencePolicy("mongo-1",4294967296,67108864,2147483648,20) })));
 app.MapPost("/runs",async (CreateRun request,CancellationToken ct)=> {
     if((request.Configuration is null)==(request.Variant is null)) throw new RuleException("明确提供variant或configuration之一");
     return Json(Wire.Write(new {Id=await store.Create(request.RequestId,request.Configuration is null?Variants.Create(request.Variant!):ScenarioLoader.Read(request.Configuration),request.Policy,ct)}));

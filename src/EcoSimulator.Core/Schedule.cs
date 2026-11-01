@@ -20,6 +20,7 @@ public static class Variants
         var s=Baseline.Create();
         return name switch {
             "baseline" => s,
+            "town" => TownScenario.Create(),
             "space" => SpatialScenarios.Create(),
             "environment" => SpatialScenarios.Create(true),
             "production" => ProductionScenario.Create(),
