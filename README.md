@@ -1,99 +1,127 @@
 # MyEcoSimulator
 
-规则来源见 [spec总览](spec/00_index.md)，实施状态见 [feature索引](feature/README.md)。
+一个让人通过小镇生活理解经济的 2D 游戏。居民需要进食与休息，工坊组织劳动、支付工资、生产并出售食品；食物、现金和人的选择共同推动世界变化。
 
-当前已完成F01—F04：独立C#内存核心，支持严格场景加载、资产核对、固定意图结算及基准自主策略720回合运行。
+当前以“河湾镇”为唯一玩家开局：20 位居民、一家食品工坊，以及河流、树木和公共建筑。通过全屏等距地图探索聚落，点选人物和工坊，逐层了解需求、行动理由、生产与交易。项目目前处于**观察式游戏**阶段，尚未加入玩家经营指令。
 
-[F04A](feature/04a_persistence.md)已按已验证范围完成：API使用MongoDB持久化，支持状态恢复、分页历史与流式导出。已知限制见feature记录。
+## 当前体验
 
-[F06](feature/06_production.md)提供受约束生产场景：`ProductionScenario.Create()`，或创建运行时指定 `Variant: "production"`。使用独立 `production-1` / `procurement-1` 版本，原料、独占工具耐久、三回合完整步骤、工资优先采购与进度恢复；规则和明确拒绝的范围见feature记录。
+- 拖动地图、滚轮缩放，点击人物、工坊、公共建筑或树木查看详情。
+- 从居民列表选择同地点人物，查看健康、饱腹、精力、现金和持有物品。
+- 暂停、继续、单步推进，切换 1×、4×、12× 速度。
+- 按需打开经济趋势、最近动态和历史凭据，追踪行动、资源预留及资产记录。
+- 世界自动持久化到 MongoDB，支持刷新恢复、按存档标识载入和导出完整记录。
 
-使用.NET SDK 9.0.300，目标.NET 8：
+快捷键：`空格` 暂停或继续，`H` 回到聚落，`Esc` 关闭面板。
+
+默认开局固定；未来起点差异将通过开局参数配置表达。历史场景变体保留为内部验证及兼容接口，不在玩家界面罗列。
+
+## 本地启动
+
+以下命令在仓库根目录执行，示例使用 PowerShell。
+
+### 环境要求
+
+- .NET SDK **9.0.300**，补丁版本选择遵循 `global.json`；项目目标为 .NET 8。
+- Node.js **22.12+** 和 npm。
+- MongoDB **8.2** 副本集及 `mongosh`，或可运行仓库 Compose 配置的 Docker 环境。
+
+MongoDB 必须支持事务。后端启动时会检查数据库，不会退回内存模式。
+
+### 1. 启动 MongoDB
+
+任选一种方式：
 
 ```powershell
-dotnet test -c Release
+# Docker，数据保存在 eco-mongo 卷中
+docker compose up -d
 ```
 
-核心调用：
-
-```csharp
-using EcoSimulator.Core;
-var scenario = Baseline.Create();
-var json = ScenarioLoader.Write(scenario);
-var world = World.Load(ScenarioLoader.Read(json));
-var company = world.Report("F"); // 现金200000，存货10000，权益210000分
+```powershell
+# 本地 Windows，默认使用 C:/Program Files/MongoDB/Server/8.2/bin/mongod.exe
+./scripts/start-mongo.ps1
 ```
 
-`World.Commit`供后续结算器提交完整候选物品集合与实体平衡分录；它验证账实和现金守恒，不代替F02的授权、意图与预留检查。初始化事件、物品和报告均为内存数据。成本与金额使用整数，批次摊销中间乘法使用BigInteger防止溢出。
+首次启动后初始化副本集；已有副本集无需重复执行：
 
-固定意图结算入口为 `World.Advance(new TurnInput(people, orders))`，结果包含前后快照、十阶段、预留、执行反馈和状态事实。`World.View(entity)`提供主体自身信息；`World.Snapshot()`供全局观察。非法回合回滚并暂停，`World.Failure`保留输入和失败原因。
-
-自主运行：
-
-```csharp
-var world = World.Load(Baseline.Create());
-for (int t = 0; t < 720; t++) world.AdvanceAutonomously();
-var history = world.AutonomousHistory; // 完整快照、决策输入/版本、公开任务和实际反馈
+```powershell
+mongosh mongodb://localhost:27018 --eval 'rs.initiate({_id:"eco-rs",members:[{_id:0,host:"localhost:27018"}]})'
 ```
 
-策略接口为 `IPersonStrategy` / `ICompanyStrategy`，仅接收各自可见信息；观察者快照不传给策略。基准固定工资、单企业、无融资分红、禁止个人食品生产；库存压力降价等为策略假设。验证关注合法性与可解释性，不要求价格稳定或人口长期存活。运行服务由F04提供，F05观察界面已完成。
-
-
-## F04 历史内存服务接口（由下方F04A入口替代）
-
-启动：`dotnet run --project src/EcoSimulator.Api --urls http://localhost:5184`。
-
-`POST /runs`：`{"RequestId":"create-1","Variant":"baseline","Configuration":null}`。
-变体：`baseline`、`no-resident-cash`、`low-capital`、`productivity`、`demand`、`pause`。
-导出的Configuration对象转为JSON字符串后，可代替Variant提交，开始新运行。
-
-`POST /runs/{id}/commands`：`{"RequestId":"step-1","Operation":"step","Speed":null}`。
-支持pause、resume、step、speed；Speed为每秒回合数（大于0且不超过1000），实际速度受计算耗时限制。
-同请求标识同命令返回原结果，冲突命令拒绝。
-
-读取：`GET /runs/{id}`、`/snapshot?turn=1`、`/history?from=0&to=23&subject=P00&item=food&market=R0:food`、`/daily`、`/export`。
-历史筛选返回匹配对象所在完整回合，保留关联交易和分录。Int64字段统一为十进制字符串。
-导出模式runtime-1；配置严格校验，不接受整个导出作为配置，不支持快照续跑。
-
-每回合保存快照、意图、理由、预留、执行反馈与批次变更事实；日汇总按日及参数版本分段。
-MemoryBudget按保留历史UTF-16序列化大小计费，提交前保守预留；不等于进程工作集上限。
-对象及导出临时缓冲另占内存，性能记录见F04。预算不足暂停且保留历史供导出。
-## F04A 持久化入口
-
-API 已切换为 MongoDB 必需配置，驱动 MongoDB.Driver 3.5.2，验证服务器 MongoDB 8.2。
-本地 Windows：`./scripts/start-mongo.ps1`；容器：`docker compose up -d`。
-使用 mongosh 初始化：
-`mongosh mongodb://localhost:27018 --eval 'rs.initiate({_id:"eco-rs",members:[{_id:0,host:"localhost:27018"}]})'`。
+### 2. 启动后端
 
 ```powershell
 $env:Mongo__Connection='mongodb://localhost:27018/?directConnection=true'
 $env:Mongo__Database='eco'
-dotnet run --project src/EcoSimulator.Api --urls http://localhost:5184
+dotnet run --no-launch-profile --project src/EcoSimulator.Api --urls http://localhost:5184
 ```
 
-创建请求新增必填 Policy：
-`{"RequestId":"create-1","Variant":"baseline","Configuration":null,"Policy":{"Schema":"mongo-1","StorageBytes":4294967296,"InflightBytes":67108864,"ProcessBytes":2147483648,"PageSize":20}}`。
-旧F04场景可通过显式提供此部署边界创建持久化运行；旧runtime-1导出不是恢复输入。
-历史接口改为 `/history?after=-1&limit=20&subject=P00&item=food&market=R0:food`，返回Records及Next游标；完整回合保留关联。
-导出改为 runtime-2 NDJSON，首行配置与截止回合，次行初始化事件，其后每行一个完整回合；响应流逐回合读取并等待写出。
-重启默认停止调度，显式resume继续。恢复状态world-1保存余额、批次、任务、股份、生理状态、策略记忆与成交窗口。
-数据库连接不进入导出。初始化会检查副本集及实际事务能力；无数据库时启动失败。
-
-F04A完成范围以已验证用例为准，已知限制详见feature记录。
-
-## F05 观察界面
-
-前置：Node.js 22.12+，上述 MongoDB 副本集及环境配置。
+保留这个终端运行，在另一个终端启动前端：
 
 ```powershell
 npm ci --prefix web
-npm run build --prefix web
-dotnet run --project src/EcoSimulator.Api --urls http://localhost:5184
+npm run dev --prefix web -- --port 5173 --strictPort
 ```
 
-打开 http://localhost:5184 。开发模式为 `npm run dev --prefix web`，Vite 将 `/runs` 转发至5184。
-浏览器保存运行标识，刷新只读取持久化事实；清除浏览器存储后可输入原标识。
-历史筛选回合为结算回合t，快照边界t+1为该回合提交结果。导出通过浏览器下载NDJSON流。
+打开 **http://127.0.0.1:5173/**，点击“开始新的生活”。Vite 将 `/runs` 和 `/game` 请求转发到后端 `5184` 端口。
 
-真实浏览器验收：API运行后执行 `npx --prefix web playwright install chromium`、`npm run test:e2e --prefix web`。
-测试使用真实MongoDB和Chromium，创建六个新运行，各推进720回合，并保存截图至 `web/test-results/`。
+也可先执行 `npm run build --prefix web`，再用上述命令启动后端，直接打开 **http://localhost:5184/**。构建产物由 ASP.NET Core 提供，无需另开前端服务。
+
+### 存档与继续
+
+浏览器保存当前运行标识，世界状态及历史保存在 MongoDB。刷新页面可继续查看；后端重启后默认暂停，需要显式继续。清除浏览器存储或更换浏览器后，可在开始菜单输入原存档标识载入。存档标识可在“玩法说明”面板查看。
+
+NDJSON 导出是事实记录，当前不支持将整个导出文件直接导入为存档。
+
+## 规则与当前边界
+
+世界规则、决策策略和内容配置分层。所有世界数据、对象名称、状态和展示元数据来自后端；前端使用 React、TypeScript 和 PixiJS 负责渲染与交互。C# 模拟核心不依赖界面及数据库，ASP.NET Core 与 MongoDB 负责运行控制及持久化。
+
+- 意图经过校验、资源预留及统一结算，不能直接修改世界；账实变更原子提交并保持守恒。
+- 决策主体只能使用自身可见信息，观察者权限不传给策略。
+- 金额使用整数分，API 的 Int64 值以十进制字符串传输。历史记录实际结果，不承诺跨运行重放一致。
+- 当前默认开局固定工资、不融资、不分红，个人不能生产食品。建筑与树木不产生未经配置的经济效果。
+- 当前没有玩家建造、采集、住房、寻路或指挥居民功能，也没有角色行动动画。同地点人物的局部展开只便于选择，详情显示真实坐标。
+- 停产、经济停滞和居民死亡都是允许出现的结果，不以价格稳定或长期繁荣作为验收条件，也不自动补贴资源。
+
+客户端展示最近 48 条回合历史，完整事实通过服务端分页查询和流式导出。持久化容量与性能的已知边界见 [F04A](feature/04a_persistence.md)。
+
+## 开发与验证
+
+构建前端：
+
+```powershell
+npm run build --prefix web
+```
+
+当前游戏开局及相关规则的针对性验证：
+
+```powershell
+dotnet test -c Release --filter 'FullyQualifiedName~TownTests|FullyQualifiedName~SpaceEnvironmentTests|FullyQualifiedName~StrategyTests'
+```
+
+游戏界面验收需要前后端及真实 MongoDB 已启动，前端地址为 `http://127.0.0.1:5173`：
+
+```powershell
+npx --prefix web playwright install chromium
+npx --prefix web playwright test --config web/playwright.config.ts game-world.spec.ts --timeout 45000
+```
+
+测试覆盖开局、单步、居民详情、经济趋势、镜头操作、暂停继续、刷新恢复及窄屏布局，截图保存在 `web/test-results/f10-*.png`。旧浏览器脚本对应历史界面，当前游戏入口以 `game-world.spec.ts` 为准。
+
+完整 .NET 测试入口为 `dotnet test -c Release`；涉及 MongoDB 的测试环境要求及历史验收范围见相应 feature。日常验证按变更影响选择范围，无需每次执行全变体 720 回合回归。
+
+## 代码与文档导航
+
+| 路径 | 内容 |
+| --- | --- |
+| `src/EcoSimulator.Core/` | 世界状态、决策、市场、生产和结算 |
+| `src/EcoSimulator.Persistence/` | MongoDB 原子持久化、恢复、分页历史与导出 |
+| `src/EcoSimulator.Api/` | HTTP 接口、运行调度及构建后的前端资源 |
+| `web/` | 游戏界面与浏览器验收 |
+| `tests/` | 核心及持久化验证 |
+| [spec 总览](spec/00_index.md) | 当前目标与规则的权威来源 |
+| [feature 索引](feature/README.md) | 实施计划及历史验收记录 |
+| [F10 游戏世界](feature/10_game_world.md) | 当前游戏界面的实现与验收范围 |
+
+当前规则版本为 `0.3`，玩家开局内容版本为 `town-1`。F01—F10 的完成范围以各 feature 记录为准；历史方案不代表所有机制都已进入默认游戏。
