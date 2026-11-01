@@ -43,9 +43,9 @@ public static class ScenarioLoader
             R(s.Entities.Count(e => e.Kind==EntityKind.Company)==1 && s.Recipes.Length==1 && s.Recipes[0].Steps.Length>0 && s.Schedule.All(c => c.Output is null), "F06 requires one company, one stepped recipe, and no productivity schedule");
             R(s.ItemTypes.Any(t=>t.Id=="food" && t.Tag=="food" && t.Satiety==20) && s.Recipes[0].OutputType=="food" && s.ItemTypes.Select(t=>t.Tag).Distinct().Count()==s.ItemTypes.Length, "procurement-1 requires food and unique homogeneous material tags");
         }
-        else R(s.Procurement is null && s.Strategy.Version=="baseline-1", "Invalid or disabled procurement parameters");
+        else R(s.Procurement is null && (s.Strategy.Version=="baseline-1" || s.Strategy.Version=="needs-1"), "Invalid or disabled procurement parameters");
         R((s.Terrain == "flat" || s.EnabledMechanisms.Contains("environment-1")) && s.DeathInvestmentPolicy == "confiscate", "不支持的地形或股权死亡机制");
-        R(s.World.Version == "0.3" && (s.Strategy.Version == "baseline-1" || s.Strategy.Version == "procurement-1"), "不支持的参数版本");
+        R(s.World.Version == "0.3" && (s.Strategy.Version == "baseline-1" || s.Strategy.Version == "procurement-1" || s.Strategy.Version == "needs-1"), "不支持的参数版本");
         R(s.World.Maximum > 0 && new[] { s.World.SatietyDecay, s.World.EnergyDecay, s.World.RestRecovery, s.World.HungerDamage, s.World.FatigueDamage, s.World.HealthyThreshold, s.World.HealthRecovery }.All(x => x >= 0) && s.World.HealthyThreshold <= s.World.Maximum, "世界参数非法");
         R(s.Strategy.Window > 0 && s.Strategy.SafetyStock >= 0 && s.Strategy.TrialProduction >= 0 && s.Strategy.ObservationTurns > 0, "策略参数非法");
         R(s.Limits.Turns > 0 && s.Limits.HistoryTurns >= s.Limits.Turns && s.Limits.SnapshotInterval == 1 && s.Limits.MemoryBytes > 0, "运行边界非法");
@@ -102,5 +102,6 @@ public static class ScenarioLoader
         foreach (var m in s.Markets) R(regions.ContainsKey(m.Region) && types.Values.Any(t => t.Tag == m.Tag) && m.ReferencePrice > 0 && m.AccountingValue > 0 && m.LatestPrice is null, "市场非法");
         foreach (var r in s.Regions) foreach (var t in s.ItemTypes) R(s.Markets.Any(m => m.Region == r.Id && m.Tag == t.Tag), "缺初始价格");
         Inventory.Validate(s.Lots, entities, types, TileCheck);
+        DecisionRules.Validate(s);
     }
 }

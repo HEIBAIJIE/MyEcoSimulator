@@ -9,3 +9,4 @@ web/test-results/
 web/playwright-report/
 web/*.tsbuildinfo
 artifacts/f11-review/run.ndjson
+artifacts/f12/*.ndjson

@@ -68,6 +68,7 @@ public sealed record Scenario(string Name, string RuleVersion, string Configurat
     Authorization[] Authorizations, Warehouse[] Warehouses, ItemType[] ItemTypes, Recipe[] Recipes, WorkTask[] Tasks,
     Lot[] Lots, Market[] Markets, string Issuer, long Issuance, CashAllocation[] Cash, string DeathInvestmentPolicy)
 {
+    public DecisionPolicy? Decisions { get; init; }
     public SpatialConfiguration? Space { get; init; }
     public EnvironmentConfiguration? Environment { get; init; }
     public TaskPriority[] TaskPriorities { get; init; } = [];
@@ -90,3 +91,6 @@ public sealed record ProcurementParameters(string Version, long Window, long Saf
 
 public sealed record OrganizationPolicy(string Company, string StrategyVersion, long SafetyStock, long SellPercent, bool Paused);
 public sealed record TaskPriority(string Company, string Job, long Priority);
+
+public sealed record DecisionPolicy(string Version, string FoodType, long EatThreshold, long EatTarget, long RestThreshold, long RestTarget, WorkWindow[] WorkWindows);
+public sealed record WorkWindow(string Company, int[] Hours);

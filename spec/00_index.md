@@ -21,7 +21,7 @@
 | 决策规则 | [基准策略](decision-rules/02_baseline_strategy.md) | 基准个人与企业策略 |
 | 决策规则 | [受约束生产策略](decision-rules/03_production_strategy.md) | procurement-1 独立扩展策略 |
 | 决策规则 | [多企业策略](decision-rules/04_organization_strategy.md) | organizations-1 授权与任务轮换实例 |
-| 决策规则 | [小镇生活策略](decision-rules/05_town_life_strategy.md) | town-life-1，F12待实施 |
+| 决策规则 | [小镇生活策略](decision-rules/05_town_life_strategy.md) | needs-1，F12待实施 |
 | 内容配置 | [小镇生活开局](content-config/04_town_life.md) | town-2，F12待实施 |
 | 内容配置 | [场景变体与指标](content-config/03_variants_metrics.md) | 场景变体与指标 |
 | 内容配置 | [配置规范](content-config/01_configuration.md) | 配置规范与最小场景 |
@@ -45,7 +45,7 @@
 
 测试场景、自动校验清单和技术验收方案暂不纳入本 spec；后续从 feature 拆分维度制定。世界合法性约束仍然有效，发现非法状态不得用自动补贴、虚构资源或补记权益掩盖。
 
-玩家默认入口采用town-1单一聚落及F10游戏式呈现，经济规则仍为0.3；baseline-1及其他变体保留内部验证用途。详见运行架构与观察、配置规范。
+玩家默认入口采用town-2单一聚落及生活策略，经济规则仍为0.3；baseline-1及其他变体保留内部验证用途。高速迭代不保留旧存档兼容，MongoDB记录可清理重建。详见运行架构与观察、配置规范。
 
 ## 观察与解释边界
 

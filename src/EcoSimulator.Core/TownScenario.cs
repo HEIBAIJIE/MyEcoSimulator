@@ -1,8 +1,8 @@
-﻿namespace EcoSimulator.Core;
+namespace EcoSimulator.Core;
 
 public static class TownScenario
 {
-    public static Scenario Create()
+    private static Scenario CreateBase()
     {
         var s=Baseline.Create();
         var cells=new List<TerrainCell>();
@@ -21,6 +21,16 @@ public static class TownScenario
         Building("storehouse",3,8,2,2,"S");
         for(long x=1;x<18;x++) for(long y=1;y<22;y++)
             if((x*17+y*31)%19==0 && !surfaces.Any(e=>e.Tile.X==x&&e.Tile.Y==y) && (x>10||y>12)) surfaces.Add(new("tree-"+x+"-"+y,"tree",new("R0",x,y),null));
-        return s with { Name="河湾镇", ConfigurationVersion="town-1",EnabledMechanisms=["space-1","environment-1"],Space=new("space-1",2),Environment=new("environment-1",["flat","water"],cells.ToArray(),[new("wall",["flat"],true),new("tree",["flat"],false)],surfaces.ToArray(),buildings.ToArray()) };
+        return s with { Name="河湾镇", ConfigurationVersion="town-2",EnabledMechanisms=["space-1","environment-1"],Space=new("space-1",2),Environment=new("environment-1",["flat","water"],cells.ToArray(),[new("wall",["flat"],true),new("tree",["flat"],false)],surfaces.ToArray(),buildings.ToArray()) };
+    }
+    public static Scenario Create()
+    {
+        var s=CreateBase(); var env=s.Environment!;
+        var parts=new List<SurfaceEntity>();
+        for(int x=8;x<10;x++) for(int y=8;y<10;y++) parts.Add(new($"rest-house-{x}-{y}","wall",new("R0",x,y),"S"));
+        return s with { ConfigurationVersion="town-2",Strategy=s.Strategy with { Version="needs-1" },Tasks=[],
+            Decisions=new("needs-1","food",50,80,30,80,[new("F",Enumerable.Range(8,9).ToArray())]),
+            Entities=s.Entities.Select((e,i)=>e.Kind!=EntityKind.Person?e:e with { Location=new("R0",4+i%2,4+i%4/2),Satiety=58+8*(i%4),Energy=38+16*(i%4) }).ToArray(),
+            Environment=env with { Surfaces=env.Surfaces.Concat(parts).ToArray(),Buildings=env.Buildings.Append(new("rest-house",new("R0",8,8),2,2,parts.Select(p=>p.Id).ToArray(),"S",0)).ToArray() } };
     }
 }

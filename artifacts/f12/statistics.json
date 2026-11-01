@@ -1,0 +1,12 @@
+{
+  "strategy": "needs-1",
+  "turns": 720,
+  "sameActionTurns": 116,
+  "actions": {
+    "Idle": 6279,
+    "Rest": 1501,
+    "Eat": 1461,
+    "Labor": 335
+  },
+  "idleRatio": 0.6557017543859649
+}

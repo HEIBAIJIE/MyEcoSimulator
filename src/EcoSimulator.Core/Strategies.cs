@@ -20,7 +20,7 @@ public sealed class BaselinePersonStrategy : IPersonStrategy
     {
         var self = v.Self;
         var demand = v.Turn % 24 == 0 ? StrategyMath.Ceil(checked(24 * p.SatietyDecay), 20) : m.Demand;
-        var resting = self.Satiety > 40 && (self.Energy <= 20 || m.Resting && self.Energy < 80);
+        var resting = s.Version=="baseline-1" && self.Satiety > 40 && (self.Energy <= 20 || m.Resting && self.Energy < 80);
         var task = v.Tasks.FirstOrDefault(t => t.Employee == self.Id && t.EffectiveTurn == v.Turn);
         var action = self.Satiety <= 40 ? new MainAction(ActionKind.Eat, Type: "food", Maximum: StrategyMath.Ceil(100-self.Satiety,20), Conditional:true)
             : resting ? new(ActionKind.Rest) : task is null ? new(ActionKind.Idle) : new(ActionKind.Labor,task.Id);
@@ -93,7 +93,7 @@ public sealed partial class World
         {
             if(scenario.EnabledMechanisms.Contains("organizations-1")) return AdvanceOrganizationsAutonomously();
             if(scenario.EnabledMechanisms.Contains("production-1")) return AdvanceProductionAutonomously();
-            personStrategy ??= new BaselinePersonStrategy(); companyStrategy ??= new BaselineCompanyStrategy();
+            personStrategy ??= scenario.Decisions is {} policy ? new NeedsPersonStrategy(policy,scenario.ItemTypes) : new BaselinePersonStrategy(); companyStrategy ??= new BaselineCompanyStrategy();
             var before=Snapshot();
             var people=before.Entities.Where(e => e.Kind==EntityKind.Person && e.Health>0).Select(e => personStrategy.Decide(View(e.Id),personalMemories.GetValueOrDefault(e.Id,new()),EffectiveWorld,scenario.Strategy)).ToArray();
             var companies=before.Entities.Where(e => e.Kind==EntityKind.Company).Select(e => {
@@ -104,7 +104,7 @@ public sealed partial class World
             }).ToArray();
             var orders=people.Select(p => p.Order).Concat(companies.Select(c => c.Decision.Order)).OfType<MarketOrder>().ToArray();
             var input=new TurnInput(Array.AsReadOnly(people.Select(p => p.Intent).ToArray()),Array.AsReadOnly(orders));
-            var tasks=BlockNewTasks ? [] : companies.SelectMany(c => c.Decision.Tasks).ToArray();
+            var tasks=BlockNewTasks ? [] : companies.SelectMany(c => c.Decision.Tasks).Where(t => scenario.Decisions is null || scenario.Decisions.WorkWindows.Single(c=>c.Company==t.Company).Hours.Contains((int)(t.EffectiveTurn%24))).ToArray();
             foreach(var task in tasks)
             {
                 var recipe=RecipeVersions.SingleOrDefault(r => r.Id==task.Recipe && r.Version==task.RecipeVersion);

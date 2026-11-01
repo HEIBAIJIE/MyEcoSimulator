@@ -23,7 +23,8 @@ public sealed record ObserverSnapshot(long Turn, IReadOnlyList<Entity> Entities,
     public IReadOnlyList<Employee> Jobs { get; init; } = [];
     public IReadOnlyList<ActionProgress> Production { get; init; } = [];
 }
-public sealed record DecisionView(long Turn, Entity Self, BalanceSheet Account, IReadOnlyList<Lot> Inventory, IReadOnlyList<Authorization> Permissions, IReadOnlyList<WorkTask> Tasks, IReadOnlyList<Market> Markets);
+public sealed record DecisionView(long Turn, Entity Self, BalanceSheet Account, IReadOnlyList<Lot> Inventory, IReadOnlyList<Authorization> Permissions, IReadOnlyList<WorkTask> Tasks, IReadOnlyList<Market> Markets)
+{ public Building[] RestSites { get; init; } = []; public TransportProgress? Transport { get; init; } public ActionProgress? Production { get; init; } }
 public sealed record TurnResult(long Turn, ObserverSnapshot Before, ObserverSnapshot After, IReadOnlyList<IntentResult> Results, IReadOnlyList<Reservation> Reservations, IReadOnlyList<StateFact> Facts, IReadOnlyList<int> Stages);
 public sealed record FailedTurn(long Turn, ObserverSnapshot Before, TurnInput Input, string Reason);
 
@@ -54,7 +55,7 @@ public sealed partial class World
     {
         lock(gate) { var snap=Snapshot(); var self=People[entity];
             return new(Turn,self,Report(entity),Array.AsReadOnly(lots.Where(l => l.Owner==entity || l.Owner is not null && scenario.Authorizations.Contains(new(entity,l.Owner,"view"))).ToArray()),Array.AsReadOnly(scenario.Authorizations.Where(a => a.Person==entity).ToArray()),
-                Array.AsReadOnly(snap.Tasks.Where(t => t.Employee==entity || t.Company==entity).ToArray()),Array.AsReadOnly(snap.Markets.Where(m=>m.Region==(self.Kind==EntityKind.Person?self.Location:scenario.Warehouses.Single(w=>w.Organization==entity).Location).Region).ToArray())); }
+                Array.AsReadOnly(snap.Tasks.Where(t => t.Employee==entity || t.Company==entity).ToArray()),Array.AsReadOnly(snap.Markets.Where(m=>m.Region==(self.Kind==EntityKind.Person?self.Location:scenario.Warehouses.Single(w=>w.Organization==entity).Location).Region).ToArray())) { RestSites=(currentEnvironment??scenario.Environment)?.Buildings.Where(b=>b.Anchor.Region==self.Location.Region && (b.Owner is null || b.Owner==entity || b.Owner==scenario.Issuer)).ToArray()??[], Transport=transport.GetValueOrDefault(entity), Production=productionProgress.GetValueOrDefault(entity) }; }
     }
     public TurnResult Advance(TurnInput supplied)
     {
